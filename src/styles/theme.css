@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+:root {
+  --violet-start: #6E4AE0;
+  --violet-end: #A78BFA;
+  --teal-accent: #00C9B7;
+  --pink-accent: #E879F9;
+  --bg-gradient-start: #F8F9FF;
+  --bg-gradient-end: #EEF0FF;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  min-height: 100vh;
+}
+
+/* Glassmorphism utilities */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(110, 74, 224, 0.12);
+}
+
+.glass-card-subtle {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, var(--violet-start) 0%, var(--violet-end) 100%);
+}
+
+.gradient-pill {
+  background: linear-gradient(135deg, #6E4AE0 0%, #E879F9 100%);
+}
+
+.border-glow {
+  box-shadow: 0 0 20px rgba(110, 74, 224, 0.3),
+              0 8px 32px rgba(110, 74, 224, 0.15);
+}
+
+.border-glow-teal {
+  box-shadow: 0 0 16px rgba(0, 201, 183, 0.4);
+}
+
+/* iPhone 14 Pro container */
+.mobile-container {
+  width: 393px;
+  height: 852px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #F8F9FF 0%, #EEF0FF 100%);
+}
+
+/* Safe area spacing */
+.safe-area-top {
+  padding-top: 59px; /* Status bar + notch */
+}
+
+.safe-area-bottom {
+  padding-bottom: 34px; /* Home indicator */
+}
+
+/* Animation utilities */
+.button-press {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.button-press:active {
+  transform: scale(0.97);
+}
+
+.card-lift:active {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(110, 74, 224, 0.2);
+}
+
+/* Scrollbar hiding */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.6) 50%, 
+    transparent 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6E4AE0 0%, #E879F9 100%);
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(110, 74, 224, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.1);
+}
+
+input[type="range"]::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6E4AE0 0%, #E879F9 100%);
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(110, 74, 224, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="range"]::-moz-range-thumb:active {
+  transform: scale(1.1);
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
