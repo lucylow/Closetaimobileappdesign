@@ -1,0 +1,4387 @@
+Absolutely. Below is the **complete copy/paste implementation** from the generated Replit mobile patch, including both files you need.
+
+You only need to replace/create these two files:
+
+```text
+lib/skin-mock-data.ts
+app/(tabs)/skin-care.tsx
+```
+
+The important part is that **the Skin screen starts with mock results already loaded**. It does not wait for a selfie, API key, database, or authentication before displaying the UI.
+
+This is based on the generated project files, including the project's existing Expo/React Native structure and YouCam flow. The hackathon rules require the final submission to actually integrate a YouCam Skin/Fashion API; therefore this mock layer should be treated as the **working UI/demo fallback**, while the live YouCam path remains available for the final integration. 
+
+---
+
+# FILE 1 — `lib/skin-mock-data.ts`
+
+Create:
+
+```text
+lib/skin-mock-data.ts
+```
+
+Paste **everything below**:
+
+```typescript
+// Demo-only Skin Care data for the Replit / Expo mobile build.
+//
+// IMPORTANT:
+// - This is fictional demonstration data.
+// - It is NOT a medical diagnosis.
+// - It is NOT real YouCam API output.
+// - It exists so the Skin tab has a complete visible experience
+//   before API keys, authentication, and live backend calls are configured.
+
+export type SkinConcernKey =
+  | 'hydration'
+  | 'oiliness'
+  | 'texture'
+  | 'pores'
+  | 'redness'
+  | 'blemishes'
+  | 'radiance'
+  | 'darkSpots'
+  | 'fineLines';
+
+export interface SkinConcern {
+  key: SkinConcernKey;
+  label: string;
+  score: number;
+  status: 'Excellent' | 'Good' | 'Watch' | 'Priority';
+  description: string;
+  action: string;
+  icon: string;
+}
+
+export interface SkinProduct {
+  id: string;
+  name: string;
+  category:
+    | 'cleanser'
+    | 'serum'
+    | 'moisturizer'
+    | 'spf'
+    | 'treatment';
+  price: number;
+  size: string;
+  why: string;
+  usage: string;
+  tags: string[];
+}
+
+export interface SkinRoutineStep {
+  id: string;
+  time: 'AM' | 'PM';
+  order: number;
+  title: string;
+  product: string;
+  instruction: string;
+  duration: string;
+  icon: string;
+}
+
+export interface SkinMockResult {
+  id: string;
+  createdAt: string;
+  source: 'demo';
+  skinType: 'Combination';
+  overallScore: number;
+  headline: string;
+  summary: string;
+  confidence: number;
+  concerns: SkinConcern[];
+  routine: SkinRoutineStep[];
+  products: SkinProduct[];
+  wardrobeAdvice: string[];
+  progress: {
+    label: string;
+    value: number;
+    change: number;
+  }[];
+}
+
+/*
+|--------------------------------------------------------------------------
+| MAIN MOCK RESULT
+|--------------------------------------------------------------------------
+|
+| This is deliberately populated immediately.
+|
+| The mobile Skin Care page imports SKIN_MOCK_RESULT and uses it as the
+| initial React state. Therefore the UI renders even when:
+|
+| - there is no selfie
+| - the YouCam API key is missing
+| - the user is not logged in
+| - the backend is unavailable
+| - the database is unavailable
+|
+*/
+
+export const SKIN_MOCK_RESULT: SkinMockResult = {
+  id: 'mock-skin-2026-08-08',
+
+  createdAt: '2026-08-08T08:45:00-04:00',
+
+  source: 'demo',
+
+  skinType: 'Combination',
+
+  overallScore: 84,
+
+  headline: 'Balanced with a hydration opportunity',
+
+  summary:
+    'Your demo snapshot suggests a balanced combination profile. Hydration and radiance are strong, while pores and redness are lower-priority signals to monitor.',
+
+  confidence: 92,
+
+  /*
+  |--------------------------------------------------------------------------
+  | SKIN CONCERNS
+  |--------------------------------------------------------------------------
+  */
+
+  concerns: [
+    {
+      key: 'hydration',
+
+      label: 'Hydration',
+
+      score: 78,
+
+      status: 'Good',
+
+      description:
+        'Comfortable moisture balance with room for extra hydration.',
+
+      action:
+        'Layer a lightweight moisturizer and drink water regularly.',
+
+      icon: 'water-outline',
+    },
+
+    {
+      key: 'oiliness',
+
+      label: 'Oiliness',
+
+      score: 46,
+
+      status: 'Good',
+
+      description:
+        'Moderate oil activity, especially in the center of the face.',
+
+      action:
+        'Use a gentle cleanser and avoid over-stripping the skin.',
+
+      icon: 'sparkles-outline',
+    },
+
+    {
+      key: 'texture',
+
+      label: 'Texture',
+
+      score: 72,
+
+      status: 'Good',
+
+      description:
+        'Generally smooth-looking texture with mild uneven areas.',
+
+      action:
+        'Keep exfoliation gentle and consistent rather than aggressive.',
+
+      icon: 'scan-outline',
+    },
+
+    {
+      key: 'pores',
+
+      label: 'Pores',
+
+      score: 39,
+
+      status: 'Excellent',
+
+      description:
+        'Pore visibility is relatively low in this demo snapshot.',
+
+      action:
+        'Maintain your current cleansing routine.',
+
+      icon: 'ellipse-outline',
+    },
+
+    {
+      key: 'redness',
+
+      label: 'Redness',
+
+      score: 28,
+
+      status: 'Excellent',
+
+      description:
+        'Low visible redness signal in this demo profile.',
+
+      action:
+        'Continue with gentle, fragrance-conscious products.',
+
+      icon: 'flame-outline',
+    },
+
+    {
+      key: 'blemishes',
+
+      label: 'Blemishes',
+
+      score: 18,
+
+      status: 'Excellent',
+
+      description:
+        'Low blemish signal in the demonstration result.',
+
+      action:
+        'Keep the routine simple and avoid unnecessary product switching.',
+
+      icon: 'medical-outline',
+    },
+
+    {
+      key: 'radiance',
+
+      label: 'Radiance',
+
+      score: 81,
+
+      status: 'Excellent',
+
+      description:
+        'Strong visible radiance signal in this demo snapshot.',
+
+      action:
+        'Protect that glow with daily broad-spectrum SPF.',
+
+      icon: 'sunny-outline',
+    },
+
+    {
+      key: 'darkSpots',
+
+      label: 'Dark Spots',
+
+      score: 61,
+
+      status: 'Watch',
+
+      description:
+        'A moderate pigmentation signal worth tracking over time.',
+
+      action:
+        'Prioritize daily SPF and consistent skin care.',
+
+      icon: 'contrast-outline',
+    },
+
+    {
+      key: 'fineLines',
+
+      label: 'Fine Lines',
+
+      score: 67,
+
+      status: 'Good',
+
+      description:
+        'Mild fine-line signal for a general wellness demo.',
+
+      action:
+        'Focus on sun protection and hydration.',
+
+      icon: 'remove-outline',
+    },
+  ],
+
+  /*
+  |--------------------------------------------------------------------------
+  | ROUTINE
+  |--------------------------------------------------------------------------
+  */
+
+  routine: [
+    /*
+    |--------------------------------------------------------------------------
+    | MORNING
+    |--------------------------------------------------------------------------
+    */
+
+    {
+      id: 'am-1',
+
+      time: 'AM',
+
+      order: 1,
+
+      title: 'Cleanse',
+
+      product: 'Gentle Daily Cleanser',
+
+      instruction:
+        'Massage onto damp skin for 30–45 seconds, then rinse.',
+
+      duration: '1 min',
+
+      icon: 'water-outline',
+    },
+
+    {
+      id: 'am-2',
+
+      time: 'AM',
+
+      order: 2,
+
+      title: 'Hydrate',
+
+      product: 'Hydrating Serum',
+
+      instruction:
+        'Apply 2–3 drops to slightly damp skin.',
+
+      duration: '30 sec',
+
+      icon: 'beaker-outline',
+    },
+
+    {
+      id: 'am-3',
+
+      time: 'AM',
+
+      order: 3,
+
+      title: 'Moisturize',
+
+      product: 'Lightweight Barrier Cream',
+
+      instruction:
+        'Use a thin layer over the face and neck.',
+
+      duration: '30 sec',
+
+      icon: 'heart-outline',
+    },
+
+    {
+      id: 'am-4',
+
+      time: 'AM',
+
+      order: 4,
+
+      title: 'Protect',
+
+      product: 'Broad-Spectrum SPF 30+',
+
+      instruction:
+        'Apply generously as the final morning step.',
+
+      duration: '1 min',
+
+      icon: 'sunny-outline',
+    },
+
+    /*
+    |--------------------------------------------------------------------------
+    | EVENING
+    |--------------------------------------------------------------------------
+    */
+
+    {
+      id: 'pm-1',
+
+      time: 'PM',
+
+      order: 1,
+
+      title: 'Cleanse',
+
+      product: 'Gentle Daily Cleanser',
+
+      instruction:
+        'Remove makeup and sunscreen without scrubbing.',
+
+      duration: '1 min',
+
+      icon: 'water-outline',
+    },
+
+    {
+      id: 'pm-2',
+
+      time: 'PM',
+
+      order: 2,
+
+      title: 'Treat',
+
+      product: 'Calming Recovery Serum',
+
+      instruction:
+        'Use a small amount and avoid irritated areas.',
+
+      duration: '30 sec',
+
+      icon: 'sparkles-outline',
+    },
+
+    {
+      id: 'pm-3',
+
+      time: 'PM',
+
+      order: 3,
+
+      title: 'Restore',
+
+      product: 'Lightweight Barrier Cream',
+
+      instruction:
+        'Finish with a comfortable layer of moisturizer.',
+
+      duration: '30 sec',
+
+      icon: 'moon-outline',
+    },
+  ],
+
+  /*
+  |--------------------------------------------------------------------------
+  | MOCK PRODUCT CATALOG
+  |--------------------------------------------------------------------------
+  */
+
+  products: [
+    {
+      id: 'p1',
+
+      name: 'Gentle Daily Cleanser',
+
+      category: 'cleanser',
+
+      price: 18,
+
+      size: '150 ml',
+
+      why:
+        'Supports a simple cleansing step without making the routine complicated.',
+
+      usage: 'AM + PM',
+
+      tags: [
+        'gentle',
+        'daily',
+      ],
+    },
+
+    {
+      id: 'p2',
+
+      name: 'Hydrating Serum',
+
+      category: 'serum',
+
+      price: 28,
+
+      size: '30 ml',
+
+      why:
+        'Pairs naturally with the hydration score of 78 in the demo result.',
+
+      usage: 'AM',
+
+      tags: [
+        'hydration',
+        'lightweight',
+      ],
+    },
+
+    {
+      id: 'p3',
+
+      name: 'Barrier Cream',
+
+      category: 'moisturizer',
+
+      price: 24,
+
+      size: '50 ml',
+
+      why:
+        'Provides a simple moisture layer for combination skin.',
+
+      usage: 'AM + PM',
+
+      tags: [
+        'barrier',
+        'comfort',
+      ],
+    },
+
+    {
+      id: 'p4',
+
+      name: 'Daily SPF 30+',
+
+      category: 'spf',
+
+      price: 22,
+
+      size: '50 ml',
+
+      why:
+        'The app emphasizes consistent sun protection for everyday skin care.',
+
+      usage: 'AM',
+
+      tags: [
+        'SPF',
+        'daily',
+      ],
+    },
+
+    {
+      id: 'p5',
+
+      name: 'Calming Recovery Serum',
+
+      category: 'treatment',
+
+      price: 32,
+
+      size: '30 ml',
+
+      why:
+        'A demo recommendation for keeping the evening routine calm and simple.',
+
+      usage: 'PM',
+
+      tags: [
+        'calming',
+        'night',
+      ],
+    },
+  ],
+
+  /*
+  |--------------------------------------------------------------------------
+  | SKIN × WARDROBE
+  |--------------------------------------------------------------------------
+  |
+  | This is where the skincare component becomes part of Closet Organizer AI
+  | rather than simply being an isolated skin scanner.
+  |
+  */
+
+  wardrobeAdvice: [
+    'For today: choose soft, neutral clothing colors if you want the skin/radiance result to remain the visual focus.',
+
+    'For a polished look: pair the navy blazer with the white tee already in your demo wardrobe.',
+
+    'For an evening look: use the leather jacket with the silk blouse for a higher-contrast style direction.',
+
+    'Keep the skin routine separate from medical decisions; the wardrobe suggestions are style guidance only.',
+  ],
+
+  /*
+  |--------------------------------------------------------------------------
+  | MOCK PROGRESS
+  |--------------------------------------------------------------------------
+  |
+  | Gives the mobile application something to display even before a real
+  | historical scan database exists.
+  |
+  */
+
+  progress: [
+    {
+      label: 'Hydration',
+      value: 78,
+      change: 6,
+    },
+
+    {
+      label: 'Texture',
+      value: 72,
+      change: 4,
+    },
+
+    {
+      label: 'Radiance',
+      value: 81,
+      change: 9,
+    },
+
+    {
+      label: 'Redness',
+      value: 28,
+      change: -5,
+    },
+  ],
+};
+
+/*
+|--------------------------------------------------------------------------
+| SCORE → STATUS
+|--------------------------------------------------------------------------
+*/
+
+export function statusForScore(
+  score: number,
+): SkinConcern['status'] {
+  if (score >= 75) {
+    return 'Excellent';
+  }
+
+  if (score >= 55) {
+    return 'Good';
+  }
+
+  if (score >= 35) {
+    return 'Watch';
+  }
+
+  return 'Priority';
+}
+
+/*
+|--------------------------------------------------------------------------
+| CREATE A NEW DEMO SCAN
+|--------------------------------------------------------------------------
+|
+| This allows the "Load Demo Scan" button to behave like a real operation
+| instead of just doing nothing.
+|
+*/
+
+export function mockResultForToday(): SkinMockResult {
+  return {
+    ...SKIN_MOCK_RESULT,
+
+    id: `mock-skin-${Date.now()}`,
+
+    createdAt: new Date().toISOString(),
+  };
+}
+```
+
+---
+
+# FILE 2 — `app/(tabs)/skin-care.tsx`
+
+Now create/replace:
+
+```text
+app/(tabs)/skin-care.tsx
+```
+
+Paste **all of this**:
+
+```tsx
+import React, { useMemo, useState } from 'react';
+
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+  Platform,
+  Alert,
+} from 'react-native';
+
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+} from '@expo/vector-icons';
+
+import { Image } from 'expo-image';
+
+import * as ImagePicker from 'expo-image-picker';
+
+import * as FileSystem from 'expo-file-system';
+
+import * as Haptics from 'expo-haptics';
+
+import Animated, {
+  FadeIn,
+  FadeInUp,
+} from 'react-native-reanimated';
+
+import { LinearGradient } from 'expo-linear-gradient';
+
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { useTheme } from '@/lib/useTheme';
+
+import { useApp } from '@/contexts/AppContext';
+
+import { apiRequest } from '@/lib/query-client';
+
+import { shadows } from '@/constants/colors';
+
+import {
+  mockResultForToday,
+  SKIN_MOCK_RESULT,
+  SkinMockResult,
+} from '@/lib/skin-mock-data';
+
+
+/*
+|--------------------------------------------------------------------------
+| SKIN CONCERN ICONS
+|--------------------------------------------------------------------------
+*/
+
+const concernIcon: Record<
+  string,
+  keyof typeof Ionicons.glyphMap
+> = {
+  hydration: 'water-outline',
+
+  oiliness: 'sparkles-outline',
+
+  texture: 'scan-outline',
+
+  pores: 'ellipse-outline',
+
+  redness: 'flame-outline',
+
+  blemishes: 'medical-outline',
+
+  radiance: 'sunny-outline',
+
+  darkSpots: 'contrast-outline',
+
+  fineLines: 'remove-outline',
+};
+
+
+/*
+|--------------------------------------------------------------------------
+| SAFE NUMBER CONVERSION
+|--------------------------------------------------------------------------
+|
+| Live API responses may contain strings, numbers, null, undefined,
+| or other unexpected values.
+|
+| This keeps the UI from crashing.
+|
+*/
+
+function numberFrom(
+  value: unknown,
+  fallback = 0,
+) {
+  const n = Number(value);
+
+  return Number.isFinite(n)
+    ? Math.round(n)
+    : fallback;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| MAIN SCREEN
+|--------------------------------------------------------------------------
+*/
+
+export default function SkinCareScreen() {
+
+  const {
+    colors,
+    isDark,
+  } = useTheme();
+
+  const {
+    demoMode,
+    isAuthenticated,
+  } = useApp();
+
+  const insets =
+    useSafeAreaInsets();
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | CRITICAL:
+  |
+  | Start with mock data already loaded.
+  |
+  | This fixes the "blank Skin screen" problem.
+  |--------------------------------------------------------------------------
+  */
+
+  const [
+    result,
+    setResult,
+  ] = useState<
+    SkinMockResult | any
+  >(SKIN_MOCK_RESULT);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | OPTIONAL SELFIE
+  |--------------------------------------------------------------------------
+  */
+
+  const [
+    photoUri,
+    setPhotoUri,
+  ] = useState<string | null>(
+    null,
+  );
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | LOADING STATE
+  |--------------------------------------------------------------------------
+  */
+
+  const [
+    processing,
+    setProcessing,
+  ] = useState(false);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | ERROR STATE
+  |--------------------------------------------------------------------------
+  */
+
+  const [
+    error,
+    setError,
+  ] = useState<string | null>(
+    null,
+  );
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | COLLAPSIBLE SECTIONS
+  |--------------------------------------------------------------------------
+  */
+
+  const [
+    showRoutine,
+    setShowRoutine,
+  ] = useState(true);
+
+
+  const [
+    showProducts,
+    setShowProducts,
+  ] = useState(false);
+
+
+  const [
+    showWardrobe,
+    setShowWardrobe,
+  ] = useState(false);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | DEMO MODE
+  |--------------------------------------------------------------------------
+  |
+  | If the user isn't authenticated, don't force the live API.
+  |
+  */
+
+  const isDemo =
+    demoMode ||
+    !isAuthenticated;
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | NORMALIZED RESULT VALUES
+  |--------------------------------------------------------------------------
+  */
+
+  const concerns =
+    result?.concerns ??
+    SKIN_MOCK_RESULT.concerns;
+
+
+  const overall =
+    numberFrom(
+      result?.overallScore,
+      84,
+    );
+
+
+  const skinType =
+    result?.skinType ??
+    'Combination';
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | GROUP AM / PM ROUTINE
+  |--------------------------------------------------------------------------
+  */
+
+  const groupedRoutine =
+    useMemo(
+      () => ({
+        AM: (
+          result?.routine ?? []
+        ).filter(
+          (step: any) =>
+            step.time === 'AM',
+        ),
+
+        PM: (
+          result?.routine ?? []
+        ).filter(
+          (step: any) =>
+            step.time === 'PM',
+        ),
+      }),
+
+      [result],
+    );
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | PICK SELFIE
+  |--------------------------------------------------------------------------
+  */
+
+  const pickPhoto =
+    async () => {
+
+      try {
+
+        await Haptics.impactAsync(
+          Haptics.ImpactFeedbackStyle.Light,
+        );
+
+        const permission =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+
+        if (!permission.granted) {
+
+          Alert.alert(
+            'Photo access needed',
+
+            'Allow photo access to use a selfie with the live YouCam flow.',
+          );
+
+          return;
+        }
+
+
+        const picked =
+          await ImagePicker.launchImageLibraryAsync(
+            {
+              mediaTypes: ['images'],
+
+              allowsEditing: true,
+
+              aspect: [3, 4],
+
+              quality: 0.9,
+            },
+          );
+
+
+        if (
+          !picked.canceled &&
+          picked.assets[0]
+        ) {
+
+          setPhotoUri(
+            picked.assets[0].uri,
+          );
+
+          setError(null);
+        }
+
+      } catch (e: any) {
+
+        setError(
+          e?.message ??
+            'Unable to select the photo.',
+        );
+      }
+    };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | DEMO SCAN
+  |--------------------------------------------------------------------------
+  |
+  | This works without:
+  |
+  | - API key
+  | - database
+  | - login
+  | - selfie
+  |
+  |--------------------------------------------------------------------------
+  */
+
+  const runDemoScan =
+    async () => {
+
+      setProcessing(true);
+
+      setError(null);
+
+
+      await Haptics.impactAsync(
+        Haptics.ImpactFeedbackStyle.Medium,
+      );
+
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            650,
+          ),
+      );
+
+
+      setResult(
+        mockResultForToday(),
+      );
+
+
+      setProcessing(false);
+
+
+      await Haptics.notificationAsync(
+        Haptics.NotificationFeedbackType.Success,
+      );
+    };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | LIVE / DEMO ANALYSIS
+  |--------------------------------------------------------------------------
+  |
+  | If the user is in demo mode:
+  |
+  |     selfie → simulated result
+  |
+  | If authenticated:
+  |
+  |     selfie → backend → YouCam
+  |
+  |--------------------------------------------------------------------------
+  */
+
+  const analyzeLive =
+    async () => {
+
+      /*
+      |--------------------------------------------------------------------------
+      | No selfie
+      |--------------------------------------------------------------------------
+      */
+
+      if (!photoUri) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Demo mode doesn't require a photo.
+        |--------------------------------------------------------------------------
+        */
+
+        if (isDemo) {
+
+          return runDemoScan();
+        }
+
+
+        setError(
+          'Choose a selfie before starting a live YouCam analysis.',
+        );
+
+        return;
+      }
+
+
+      setProcessing(true);
+
+      setError(null);
+
+
+      try {
+
+        let base64 = '';
+
+        let contentType =
+          'image/jpeg';
+
+        let fileName =
+          'skin-selfie.jpg';
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | NATIVE FILE
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+          Platform.OS !== 'web' &&
+          photoUri.startsWith(
+            'file://',
+          )
+        ) {
+
+          base64 =
+            await FileSystem.readAsStringAsync(
+              photoUri,
+              {
+                encoding:
+                  FileSystem.EncodingType.Base64,
+              },
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA URL
+        |--------------------------------------------------------------------------
+        */
+
+        else if (
+          photoUri.startsWith(
+            'data:',
+          )
+        ) {
+
+          const match =
+            photoUri.match(
+              /^data:(.*?);base64,(.*)$/,
+            );
+
+
+          contentType =
+            match?.[1] ??
+            contentType;
+
+
+          base64 =
+            match?.[2] ??
+            '';
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | WEB / REMOTE URI
+        |--------------------------------------------------------------------------
+        */
+
+        else {
+
+          const response =
+            await fetch(
+              photoUri,
+            );
+
+
+          const blob =
+            await response.blob();
+
+
+          contentType =
+            blob.type ??
+            contentType;
+
+
+          fileName =
+            `skin-selfie.${
+              contentType.includes(
+                'png',
+              )
+                ? 'png'
+                : 'jpg'
+            }`;
+
+
+          base64 =
+            await new Promise<string>(
+              (
+                resolve,
+                reject,
+              ) => {
+
+                const reader =
+                  new FileReader();
+
+
+                reader.onloadend =
+                  () => {
+
+                    const value =
+                      String(
+                        reader.result,
+                      );
+
+
+                    resolve(
+                      value.split(
+                        ',',
+                      )[1] ??
+                        '',
+                    );
+                  };
+
+
+                reader.onerror =
+                  reject;
+
+
+                reader.readAsDataURL(
+                  blob,
+                );
+              },
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATE IMAGE
+        |--------------------------------------------------------------------------
+        */
+
+        if (!base64) {
+
+          throw new Error(
+            'Could not read the selected photo.',
+          );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DEMO MODE
+        |--------------------------------------------------------------------------
+        |
+        | We deliberately don't call YouCam in demo mode.
+        |--------------------------------------------------------------------------
+        */
+
+        if (isDemo) {
+
+          await new Promise(
+            resolve =>
+              setTimeout(
+                resolve,
+                800,
+              ),
+          );
+
+
+          setResult(
+            mockResultForToday(),
+          );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | LIVE YOUCAM MODE
+        |--------------------------------------------------------------------------
+        */
+
+        else {
+
+          const response =
+            await apiRequest(
+              'POST',
+              '/api/youcam/skin-analysis',
+              {
+                imageBase64:
+                  base64,
+
+                contentType,
+
+                fileName,
+              },
+            );
+
+
+          const payload =
+            await response.json();
+
+
+          setResult(
+            payload,
+          );
+        }
+
+
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success,
+        );
+
+      } catch (e: any) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | IMPORTANT FALLBACK
+        |--------------------------------------------------------------------------
+        |
+        | Even if YouCam fails, never leave the mobile screen blank.
+        |--------------------------------------------------------------------------
+        */
+
+        setError(
+          e?.message ??
+            'Skin analysis failed. Demo data is still available below.',
+        );
+
+
+        setResult(
+          mockResultForToday(),
+        );
+
+      } finally {
+
+        setProcessing(false);
+      }
+    };
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | UI
+  |--------------------------------------------------------------------------
+  */
+
+  return (
+
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            colors.background,
+        },
+      ]}
+    >
+
+      <ScrollView
+        showsVerticalScrollIndicator={
+          false
+        }
+
+        contentContainerStyle={{
+          paddingBottom: 130,
+        }}
+      >
+
+        {/*
+        |--------------------------------------------------------------------------
+        | HERO
+        |--------------------------------------------------------------------------
+        */}
+
+        <LinearGradient
+          colors={
+            isDark
+              ? [
+                  '#25171B',
+                  '#101010',
+                ]
+              : [
+                  '#F9E7EB',
+                  '#FBF7F1',
+                ]
+          }
+
+          style={[
+            styles.hero,
+            {
+              paddingTop:
+                (
+                  insets.top ||
+                  16
+                ) + 14,
+            },
+          ]}
+        >
+
+          <Animated.View
+            entering={FadeInUp.duration(
+              400,
+            )}
+
+            style={styles.header}
+          >
+
+            <View
+              style={{
+                flex: 1,
+              }}
+            >
+
+              <Text
+                style={[
+                  styles.eyebrow,
+                  {
+                    color:
+                      colors.textSecondary,
+                  },
+                ]}
+              >
+                YOUCAM SKIN AI • DEMO READY
+              </Text>
+
+
+              <Text
+                style={[
+                  styles.title,
+                  {
+                    color:
+                      colors.text,
+                  },
+                ]}
+              >
+                Skin Care
+              </Text>
+
+
+              <Text
+                style={[
+                  styles.subtitle,
+                  {
+                    color:
+                      colors.textSecondary,
+                  },
+                ]}
+              >
+                Scan your skin, understand
+                the signals, then connect
+                beauty prep with your wardrobe.
+              </Text>
+
+            </View>
+
+
+            <LinearGradient
+              colors={[
+                '#C95F76',
+                '#E89BA9',
+              ]}
+
+              style={
+                styles.badge
+              }
+            >
+
+              <MaterialCommunityIcons
+                name="face-recognition"
+                size={18}
+                color="#FFF"
+              />
+
+            </LinearGradient>
+
+          </Animated.View>
+
+        </LinearGradient>
+
+
+        <View
+          style={styles.content}
+        >
+
+          {/*
+          |--------------------------------------------------------------------------
+          | DEMO BANNER
+          |--------------------------------------------------------------------------
+          */}
+
+          <Animated.View
+            entering={FadeInUp.delay(
+              80,
+            ).duration(400)}
+
+            style={[
+              styles.demoBanner,
+              {
+                backgroundColor:
+                  colors.surface,
+
+                borderColor:
+                  '#D66B8238',
+              },
+            ]}
+          >
+
+            <View
+              style={
+                styles.demoIcon
+              }
+            >
+
+              <Ionicons
+                name="flash-outline"
+                size={17}
+                color="#D66B82"
+              />
+
+            </View>
+
+
+            <View
+              style={{
+                flex: 1,
+              }}
+            >
+
+              <Text
+                style={[
+                  styles.demoTitle,
+                  {
+                    color:
+                      colors.text,
+                  },
+                ]}
+              >
+                Mock data is ON
+              </Text>
+
+
+              <Text
+                style={[
+                  styles.demoText,
+                  {
+                    color:
+                      colors.textSecondary,
+                  },
+                ]}
+              >
+                Results are preloaded so
+                this screen renders in Replit
+                before YouCam credentials
+                are configured.
+              </Text>
+
+            </View>
+
+          </Animated.View>
+
+
+          {/*
+          |--------------------------------------------------------------------------
+          | PHOTO CARD
+          |--------------------------------------------------------------------------
+          */}
+
+          <Animated.View
+            entering={FadeInUp.delay(
+              120,
+            ).duration(400)}
+          >
+
+            <Pressable
+              onPress={
+                pickPhoto
+              }
+
+              style={[
+                styles.photoCard,
+
+                {
+                  backgroundColor:
+                    colors.surface,
+
+                  borderColor:
+                    photoUri
+                      ? '#D66B82'
+                      : colors.border,
+                },
+
+                shadows.soft,
+              ]}
+            >
+
+              {photoUri ? (
+
+                <Image
+                  source={{
+                    uri: photoUri,
+                  }}
+
+                  style={
+                    styles.photo
+                  }
+
+                  contentFit="cover"
+                />
+
+              ) : (
+
+                <View
+                  style={
+                    styles.photoEmpty
+                  }
+                >
+
+                  <View
+                    style={[
+                      styles.cameraCircle,
+                      {
+                        backgroundColor:
+                          '#D66B8218',
+                      },
+                    ]}
+                  >
+
+                    <Ionicons
+                      name="camera-outline"
+                      size={30}
+                      color="#D66B82"
+                    />
+
+                  </View>
+
+
+                  <Text
+                    style={[
+                      styles.photoTitle,
+                      {
+                        color:
+                          colors.text,
+                      },
+                    ]}
+                  >
+                    Optional: add a selfie
+                  </Text>
+
+
+                  <Text
+                    style={[
+                      styles.photoHint,
+                      {
+                        color:
+                          colors.textSecondary,
+                      },
+                    ]}
+                  >
+                    The mock result below
+                    works without a photo.
+                  </Text>
+
+                </View>
+
+              )}
+
+
+              {photoUri && (
+
+                <View
+                  style={[
+                    styles.changePill,
+                    {
+                      backgroundColor:
+                        colors.surface,
+                    },
+                  ]}
+                >
+
+                  <Ionicons
+                    name="camera-outline"
+                    size={14}
+                    color="#D66B82"
+                  />
+
+                  <Text
+                    style={{
+                      color:
+                        '#D66B82',
+
+                      fontWeight:
+                        '700',
+                    }}
+                  >
+                    Change
+                  </Text>
+
+                </View>
+
+              )}
+
+            </Pressable>
+
+          </Animated.View>
+
+
+          {/*
+          |--------------------------------------------------------------------------
+          | ACTION BUTTONS
+          |--------------------------------------------------------------------------
+          */}
+
+          <View
+            style={
+              styles.actionRow
+            }
+          >
+
+            <Pressable
+              onPress={
+                runDemoScan
+              }
+
+              disabled={
+                processing
+              }
+
+              style={[
+                styles.demoButton,
+
+                {
+                  borderColor:
+                    '#D66B82',
+
+                  opacity:
+                    processing
+                      ? 0.6
+                      : 1,
+                },
+              ]}
+            >
+
+              {processing ? (
+
+                <ActivityIndicator
+                  color="#D66B82"
+                />
+
+              ) : (
+
+                <Ionicons
+                  name="sparkles-outline"
+                  size={18}
+                  color="#D66B82"
+                />
+
+              )}
+
+
+              <Text
+                style={[
+                  styles.demoButtonText,
+                  {
+                    color:
+                      '#D66B82',
+                  },
+                ]}
+              >
+                {processing
+                  ? 'Loading…'
+                  : 'Load Demo Scan'}
+              </Text>
+
+            </Pressable>
+
+
+            <Pressable
+              onPress={
+                analyzeLive
+              }
+
+              disabled={
+                processing
+              }
+
+              style={[
+                styles.liveButton,
+                {
+                  opacity:
+                    processing
+                      ? 0.6
+                      : 1,
+                },
+              ]}
+            >
+
+              <LinearGradient
+                colors={[
+                  '#C95F76',
+                  '#E58A9B',
+                ]}
+
+                style={
+                  styles.liveGradient
+                }
+              >
+
+                <Ionicons
+                  name="scan-outline"
+                  size={18}
+                  color="#FFF"
+                />
+
+                <Text
+                  style={
+                    styles.liveText
+                  }
+                >
+                  {
+                    isDemo
+                      ? 'Analyze'
+                      : 'Analyze with YouCam'
+                  }
+                </Text>
+
+              </LinearGradient>
+
+            </Pressable>
+
+          </View>
+
+
+          {/*
+          |--------------------------------------------------------------------------
+          | SAFETY / DEMO NOTE
+          |--------------------------------------------------------------------------
+          */}
+
+          <View
+            style={
+              styles.infoRow
+            }
+          >
+
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={16}
+              color={
+                colors.tint
+              }
+            />
+
+            <Text
+              style={[
+                styles.infoText,
+                {
+                  color:
+                    colors.textSecondary,
+                },
+              ]}
+            >
+              Demo scores are fictional UI
+              data and are not medical diagnoses.
+            </Text>
+
+          </View>
+
+
+          {/*
+          |--------------------------------------------------------------------------
+          | ERROR
+          |--------------------------------------------------------------------------
+          */}
+
+          {error && (
+
+            <View
+              style={[
+                styles.error,
+                {
+                  backgroundColor:
+                    '#EF444412',
+
+                  borderColor:
+                    '#EF444440',
+                },
+              ]}
+            >
+
+              <Ionicons
+                name="alert-circle-outline"
+                size={18}
+                color="#EF4444"
+              />
+
+              <Text
+                style={{
+                  color:
+                    '#EF4444',
+
+                  flex: 1,
+                }}
+              >
+                {error}
+              </Text>
+
+            </View>
+
+          )}
+
+
+          {/*
+          |--------------------------------------------------------------------------
+          | PROCESSING
+          |--------------------------------------------------------------------------
+          */}
+
+          {processing && (
+
+            <Animated.View
+              entering={FadeIn.duration(
+                250,
+              )}
+
+              style={[
+                styles.processing,
+                {
+                  backgroundColor:
+                    colors.surface,
+                },
+              ]}
+            >
+
+              <ActivityIndicator
+                color="#D66B82"
+              />
+
+              <Text
+                style={[
+                  styles.processingTitle,
+                  {
+                    color:
+                      colors.text,
+                  },
+                ]}
+              >
+                Preparing your skin snapshot
+              </Text>
+
+
+              <Text
+                style={[
+                  styles.processingText,
+                  {
+                    color:
+                      colors.textSecondary,
+                  },
+                ]}
+              >
+                Loading the demo analysis so
+                the mobile experience stays visible.
+              </Text>
+
+            </Animated.View>
+
+          )}
+
+
+          {/*
+          |--------------------------------------------------------------------------
+          | RESULTS
+          |--------------------------------------------------------------------------
+          |
+          | Because result starts as SKIN_MOCK_RESULT,
+          | this block renders immediately.
+          |--------------------------------------------------------------------------
+          */}
+
+          {!processing &&
+            result && (
+
+              <Animated.View
+                entering={FadeInUp.duration(
+                  450,
+                )}
+              >
+
+                {/*
+                |--------------------------------------------------------------------------
+                | SCORE HEADER
+                |--------------------------------------------------------------------------
+                */}
+
+                <View
+                  style={
+                    styles.resultHeader
+                  }
+                >
+
+                  <View
+                    style={{
+                      flex: 1,
+                    }}
+                  >
+
+                    <Text
+                      style={[
+                        styles.sectionTitle,
+                        {
+                          color:
+                            colors.text,
+                        },
+                      ]}
+                    >
+                      Your Skin Snapshot
+                    </Text>
+
+
+                    <Text
+                      style={[
+                        styles.sectionSub,
+                        {
+                          color:
+                            colors.textSecondary,
+                        },
+                      ]}
+                    >
+                      {
+                        result.headline ??
+                        'Personalized signals from your skin scan'
+                      }
+                    </Text>
+
+                  </View>
+
+
+                  <View
+                    style={[
+                      styles.scoreCircle,
+                      {
+                        borderColor:
+                          '#D66B82',
+                      },
+                    ]}
+                  >
+
+                    <Text
+                      style={[
+                        styles.score,
+                        {
+                          color:
+                            colors.text,
+                        },
+                      ]}
+                    >
+                      {overall}
+                    </Text>
+
+
+                    <Text
+                      style={[
+                        styles.scoreLabel,
+                        {
+                          color:
+                            colors.textSecondary,
+                        },
+                      ]}
+                    >
+                      score
+                    </Text>
+
+                  </View>
+
+                </View>
+
+
+                {/*
+                |--------------------------------------------------------------------------
+                | SUMMARY CARD
+                |--------------------------------------------------------------------------
+                */}
+
+                <View
+                  style={[
+                    styles.summaryCard,
+                    {
+                      backgroundColor:
+                        colors.surface,
+
+                      borderColor:
+                        colors.border,
+                    },
+                  ]}
+                >
+
+                  <View
+                    style={
+                      styles.summaryTop
+                    }
+                  >
+
+                    <View
+                      style={[
+                        styles.typeIcon,
+                        {
+                          backgroundColor:
+                            '#D66B8215',
+                        },
+                      ]}
+                    >
+
+                      <Ionicons
+                        name="water-outline"
+                        size={21}
+                        color="#D66B82"
+                      />
+
+                    </View>
+
+
+                    <View
+                      style={{
+                        flex: 1,
+                      }}
+                    >
+
+                      <Text
+                        style={[
+                          styles.metricLabel,
+                          {
+                            color:
+                              colors.textSecondary,
+                          },
+                        ]}
+                      >
+                        Skin type
+                      </Text>
+
+
+                      <Text
+                        style={[
+                          styles.typeValue,
+                          {
+                            color:
+                              colors.text,
+                          },
+                        ]}
+                      >
+                        {skinType}
+                      </Text>
+
+                    </View>
+
+
+                    <View
+                      style={
+                        styles.confidence
+                      }
+                    >
+
+                      <Text
+                        style={[
+                          styles.confidenceValue,
+                          {
+                            color:
+                              colors.text,
+                          },
+                        ]}
+                      >
+                        {
+                          numberFrom(
+                            result.confidence,
+                            92,
+                          )
+                        }%
+                      </Text>
+
+
+                      <Text
+                        style={[
+                          styles.confidenceLabel,
+                          {
+                            color:
+                              colors.textSecondary,
+                          },
+                        ]}
+                      >
+                        demo confidence
+                      </Text>
+
+                    </View>
+
+                  </View>
+
+
+                  <Text
+                    style={[
+                      styles.summaryText,
+                      {
+                        color:
+                          colors.textSecondary,
+                      },
+                    ]}
+                  >
+                    {
+                      result.summary
+                    }
+                  </Text>
+
+                </View>
+
+
+                {/*
+                |--------------------------------------------------------------------------
+                | SKIN CONCERNS
+                |--------------------------------------------------------------------------
+                */}
+
+                <SectionTitle
+                  title="Skin concerns"
+                  subtitle="Nine mock signals to make the mobile experience feel complete"
+                  colors={colors}
+                />
+
+
+                <View
+                  style={
+                    styles.grid
+                  }
+                >
+
+                  {concerns.map(
+                    (
+                      item: any,
+                    ) => (
+
+                      <View
+                        key={
+                          item.key
+                        }
+
+                        style={[
+                          styles.metricCard,
+
+                          {
+                            backgroundColor:
+                              colors.surface,
+
+                            borderColor:
+                              colors.border,
+                          },
+                        ]}
+                      >
+
+                        <View
+                          style={
+                            styles.metricTop
+                          }
+                        >
+
+                          <Ionicons
+                            name={
+                              concernIcon[
+                                item.key
+                              ] ??
+                              'sparkles-outline'
+                            }
+
+                            size={18}
+
+                            color="#D66B82"
+                          />
+
+
+                          <Text
+                            style={[
+                              styles.metricStatus,
+
+                              {
+                                color:
+                                  item.score >=
+                                  70
+                                    ? '#2E8B57'
+                                    : item.score >=
+                                      40
+                                    ? '#B27A25'
+                                    : '#4A8CC7',
+                              },
+                            ]}
+                          >
+                            {
+                              item.status
+                            }
+                          </Text>
+
+                        </View>
+
+
+                        <Text
+                          style={[
+                            styles.metricName,
+                            {
+                              color:
+                                colors.textSecondary,
+                            },
+                          ]}
+                        >
+                          {
+                            item.label
+                          }
+                        </Text>
+
+
+                        <Text
+                          style={[
+                            styles.metricValue,
+                            {
+                              color:
+                                colors.text,
+                            },
+                          ]}
+                        >
+                          {
+                            numberFrom(
+                              item.score,
+                            )
+                          }
+                        </Text>
+
+
+                        <View
+                          style={[
+                            styles.progressTrack,
+                            {
+                              backgroundColor:
+                                colors.border,
+                            },
+                          ]}
+                        >
+
+                          <View
+                            style={[
+                              styles.progressFill,
+                              {
+                                width:
+                                  `${
+                                    Math.min(
+                                      100,
+                                      Math.max(
+                                        0,
+                                        numberFrom(
+                                          item.score,
+                                        ),
+                                      ),
+                                    )
+                                  }%`,
+                              },
+                            ]}
+                          />
+
+                        </View>
+
+
+                        <Text
+                          style={[
+                            styles.metricDescription,
+                            {
+                              color:
+                                colors.textSecondary,
+                            },
+                          ]}
+                        >
+                          {
+                            item.description
+                          }
+                        </Text>
+
+                      </View>
+
+                    ),
+                  )}
+
+                </View>
+
+
+                {/*
+                |--------------------------------------------------------------------------
+                | ROUTINE
+                |--------------------------------------------------------------------------
+                */}
+
+                <SectionTitle
+                  title="Personalized routine"
+                  subtitle="A simple AM/PM demo flow based on the snapshot"
+                  colors={colors}
+                />
+
+
+                <CollapsibleCard
+                  title="Morning routine"
+                  icon="sunny-outline"
+                  open={
+                    showRoutine
+                  }
+                  onPress={() =>
+                    setShowRoutine(
+                      value =>
+                        !value,
+                    )
+                  }
+                  colors={colors}
+                >
+
+                  {groupedRoutine.AM.map(
+                    (
+                      step: any,
+                    ) => (
+
+                      <RoutineRow
+                        key={
+                          step.id
+                        }
+
+                        step={
+                          step
+                        }
+
+                        colors={
+                          colors
+                        }
+                      />
+
+                    ),
+                  )}
+
+                </CollapsibleCard>
+
+
+                <CollapsibleCard
+                  title="Evening routine"
+                  icon="moon-outline"
+                  open={
+                    showRoutine
+                  }
+                  onPress={() =>
+                    setShowRoutine(
+                      value =>
+                        !value,
+                    )
+                  }
+                  colors={colors}
+                >
+
+                  {groupedRoutine.PM.map(
+                    (
+                      step: any,
+                    ) => (
+
+                      <RoutineRow
+                        key={
+                          step.id
+                        }
+
+                        step={
+                          step
+                        }
+
+                        colors={
+                          colors
+                        }
+                      />
+
+                    ),
+                  )}
+
+                </CollapsibleCard>
+
+
+                {/*
+                |--------------------------------------------------------------------------
+                | PRODUCTS
+                |--------------------------------------------------------------------------
+                */}
+
+                <SectionTitle
+                  title="Recommended products"
+                  subtitle="Mock catalog cards for the retail experience"
+                  colors={colors}
+                />
+
+
+                <CollapsibleCard
+                  title={`${
+                    (
+                      result.products ??
+                      []
+                    ).length
+                  } demo products`}
+
+                  icon="bag-handle-outline"
+
+                  open={
+                    showProducts
+                  }
+
+                  onPress={() =>
+                    setShowProducts(
+                      value =>
+                        !value,
+                    )
+                  }
+
+                  colors={colors}
+                >
+
+                  {(
+                    result.products ??
+                    []
+                  ).map(
+                    (
+                      product: any,
+                    ) => (
+
+                      <View
+                        key={
+                          product.id
+                        }
+
+                        style={[
+                          styles.productRow,
+                          {
+                            borderBottomColor:
+                              colors.border,
+                          },
+                        ]}
+                      >
+
+                        <View
+                          style={
+                            styles.productIcon
+                          }
+                        >
+
+                          <Ionicons
+                            name="flask-outline"
+                            size={18}
+                            color="#D66B82"
+                          />
+
+                        </View>
+
+
+                        <View
+                          style={{
+                            flex: 1,
+                          }}
+                        >
+
+                          <Text
+                            style={[
+                              styles.productName,
+                              {
+                                color:
+                                  colors.text,
+                              },
+                            ]}
+                          >
+                            {
+                              product.name
+                            }
+                          </Text>
+
+
+                          <Text
+                            style={[
+                              styles.productWhy,
+                              {
+                                color:
+                                  colors.textSecondary,
+                              },
+                            ]}
+                          >
+                            {
+                              product.why
+                            }
+                          </Text>
+
+
+                          <Text
+                            style={[
+                              styles.productMeta,
+                              {
+                                color:
+                                  colors.textSecondary,
+                              },
+                            ]}
+                          >
+                            {
+                              product.usage
+                            }
+
+                            {' • '}
+
+                            $
+                            {
+                              product.price
+                            }
+
+                            {' • '}
+
+                            {
+                              product.size
+                            }
+                          </Text>
+
+                        </View>
+
+                      </View>
+
+                    ),
+                  )}
+
+                </CollapsibleCard>
+
+
+                {/*
+                |--------------------------------------------------------------------------
+                | SKIN × WARDROBE
+                |--------------------------------------------------------------------------
+                */}
+
+                <SectionTitle
+                  title="Skin × wardrobe"
+                  subtitle="Make the feature feel native to Closet Organizer AI"
+                  colors={colors}
+                />
+
+
+                <CollapsibleCard
+                  title="Today's style connection"
+                  icon="shirt-outline"
+                  open={
+                    showWardrobe
+                  }
+                  onPress={() =>
+                    setShowWardrobe(
+                      value =>
+                        !value,
+                    )
+                  }
+                  colors={colors}
+                >
+
+                  {(
+                    result.wardrobeAdvice ??
+                    []
+                  ).map(
+                    (
+                      advice: string,
+                      index: number,
+                    ) => (
+
+                      <View
+                        key={
+                          index
+                        }
+
+                        style={
+                          styles.adviceRow
+                        }
+                      >
+
+                        <View
+                          style={
+                            styles.adviceDot
+                          }
+                        >
+
+                          <Text
+                            style={
+                              styles.adviceNumber
+                            }
+                          >
+                            {
+                              index + 1
+                            }
+                          </Text>
+
+                        </View>
+
+
+                        <Text
+                          style={[
+                            styles.adviceText,
+                            {
+                              color:
+                                colors.textSecondary,
+                            },
+                          ]}
+                        >
+                          {
+                            advice
+                          }
+                        </Text>
+
+                      </View>
+
+                    ),
+                  )}
+
+                </CollapsibleCard>
+
+
+                {/*
+                |--------------------------------------------------------------------------
+                | PROGRESS
+                |--------------------------------------------------------------------------
+                */}
+
+                <SectionTitle
+                  title="Progress preview"
+                  subtitle="Mock historical data so charts/cards are never empty"
+                  colors={colors}
+                />
+
+
+                <View
+                  style={[
+                    styles.progressCard,
+                    {
+                      backgroundColor:
+                        colors.surface,
+
+                      borderColor:
+                        colors.border,
+                    },
+                  ]}
+                >
+
+                  {(
+                    result.progress ??
+                    []
+                  ).map(
+                    (
+                      item: any,
+                    ) => (
+
+                      <View
+                        key={
+                          item.label
+                        }
+
+                        style={
+                          styles.progressRow
+                        }
+                      >
+
+                        <View
+                          style={{
+                            flex: 1,
+                          }}
+                        >
+
+                          <View
+                            style={
+                              styles.progressLabelRow
+                            }
+                          >
+
+                            <Text
+                              style={[
+                                styles.progressLabel,
+                                {
+                                  color:
+                                    colors.text,
+                                },
+                              ]}
+                            >
+                              {
+                                item.label
+                              }
+                            </Text>
+
+
+                            <Text
+                              style={[
+                                styles.progressChange,
+                                {
+                                  color:
+                                    item.change >=
+                                    0
+                                      ? '#2E8B57'
+                                      : '#C95F76',
+                                },
+                              ]}
+                            >
+                              {
+                                item.change >=
+                                0
+                                  ? '+'
+                                  : ''
+                              }
+
+                              {
+                                item.change
+                              }
+                            </Text>
+
+                          </View>
+
+
+                          <View
+                            style={[
+                              styles.progressTrack,
+                              {
+                                backgroundColor:
+                                  colors.border,
+                              },
+                            ]}
+                          >
+
+                            <View
+                              style={[
+                                styles.progressFill,
+                                {
+                                  width:
+                                    `${item.value}%`,
+                                },
+                              ]}
+                            />
+
+                          </View>
+
+                        </View>
+
+
+                        <Text
+                          style={[
+                            styles.progressValue,
+                            {
+                              color:
+                                colors.text,
+                            },
+                          ]}
+                        >
+                          {
+                            item.value
+                          }
+                        </Text>
+
+                      </View>
+
+                    ),
+                  )}
+
+                </View>
+
+
+                {/*
+                |--------------------------------------------------------------------------
+                | FINAL PRODUCT STORY CARD
+                |--------------------------------------------------------------------------
+                */}
+
+                <View
+                  style={[
+                    styles.footerCard,
+                    {
+                      backgroundColor:
+                        isDark
+                          ? '#211A17'
+                          : '#F6EEE8',
+
+                      borderColor:
+                        '#D6A37A40',
+                    },
+                  ]}
+                >
+
+                  <View
+                    style={
+                      styles.footerTitle
+                    }
+                  >
+
+                    <MaterialCommunityIcons
+                      name="bottle-tonic-plus-outline"
+                      size={21}
+                      color={
+                        colors.tint
+                      }
+                    />
+
+
+                    <Text
+                      style={[
+                        styles.footerTitleText,
+                        {
+                          color:
+                            colors.text,
+                        },
+                      ]}
+                    >
+                      Closet-to-Skin Experience
+                    </Text>
+
+                  </View>
+
+
+                  <Text
+                    style={[
+                      styles.footerText,
+                      {
+                        color:
+                          colors.textSecondary,
+                      },
+                    ]}
+                  >
+                    This mock flow intentionally
+                    demonstrates the full product
+                    story: selfie → skin snapshot →
+                    routine → products → wardrobe
+                    styling. Replace the mock result
+                    with the authenticated YouCam
+                    response when your API credentials
+                    are ready.
+                  </Text>
+
+                </View>
+
+              </Animated.View>
+
+            )}
+
+        </View>
+
+      </ScrollView>
+
+    </View>
+  );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| SECTION TITLE
+|--------------------------------------------------------------------------
+*/
+
+function SectionTitle({
+  title,
+  subtitle,
+  colors,
+}: any) {
+
+  return (
+
+    <View
+      style={
+        styles.sectionBlock
+      }
+    >
+
+      <Text
+        style={[
+          styles.sectionTitle,
+          {
+            color:
+              colors.text,
+          },
+        ]}
+      >
+        {
+          title
+        }
+      </Text>
+
+
+      <Text
+        style={[
+          styles.sectionSub,
+          {
+            color:
+              colors.textSecondary,
+          },
+        ]}
+      >
+        {
+          subtitle
+        }
+      </Text>
+
+    </View>
+  );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| COLLAPSIBLE CARD
+|--------------------------------------------------------------------------
+*/
+
+function CollapsibleCard({
+  title,
+  icon,
+  open,
+  onPress,
+  colors,
+  children,
+}: any) {
+
+  return (
+
+    <View
+      style={[
+        styles.collapsible,
+
+        {
+          backgroundColor:
+            colors.surface,
+
+          borderColor:
+            colors.border,
+        },
+      ]}
+    >
+
+      <Pressable
+        onPress={
+          onPress
+        }
+
+        style={
+          styles.collapsibleHeader
+        }
+      >
+
+        <View
+          style={
+            styles.collapsibleLeft
+          }
+        >
+
+          <Ionicons
+            name={icon}
+            size={18}
+            color="#D66B82"
+          />
+
+
+          <Text
+            style={[
+              styles.collapsibleTitle,
+              {
+                color:
+                  colors.text,
+              },
+            ]}
+          >
+            {
+              title
+            }
+          </Text>
+
+        </View>
+
+
+        <Ionicons
+          name={
+            open
+              ? 'chevron-up'
+              : 'chevron-down'
+          }
+
+          size={18}
+
+          color={
+            colors.textSecondary
+          }
+        />
+
+      </Pressable>
+
+
+      {open && (
+
+        <View
+          style={
+            styles.collapsibleBody
+          }
+        >
+          {
+            children
+          }
+        </View>
+
+      )}
+
+    </View>
+  );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| ROUTINE ROW
+|--------------------------------------------------------------------------
+*/
+
+function RoutineRow({
+  step,
+  colors,
+}: any) {
+
+  return (
+
+    <View
+      style={[
+        styles.routineRow,
+
+        {
+          borderBottomColor:
+            colors.border,
+        },
+      ]}
+    >
+
+      <View
+        style={
+          styles.stepIcon
+        }
+      >
+
+        <Ionicons
+          name={
+            step.icon as any
+          }
+
+          size={17}
+
+          color="#D66B82"
+        />
+
+      </View>
+
+
+      <View
+        style={{
+          flex: 1,
+        }}
+      >
+
+        <Text
+          style={[
+            styles.stepTitle,
+            {
+              color:
+                colors.text,
+            },
+          ]}
+        >
+          {
+            step.order
+          }. {
+            step.title
+          }
+        </Text>
+
+
+        <Text
+          style={[
+            styles.stepProduct,
+            {
+              color:
+                colors.textSecondary,
+            },
+          ]}
+        >
+          {
+            step.product
+          }
+
+          {' • '}
+
+          {
+            step.duration
+          }
+        </Text>
+
+
+        <Text
+          style={[
+            styles.stepInstruction,
+            {
+              color:
+                colors.textSecondary,
+            },
+          ]}
+        >
+          {
+            step.instruction
+          }
+        </Text>
+
+      </View>
+
+    </View>
+  );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| STYLES
+|--------------------------------------------------------------------------
+*/
+
+const styles =
+  StyleSheet.create({
+
+    container: {
+      flex: 1,
+    },
+
+
+    hero: {
+      paddingHorizontal: 20,
+      paddingBottom: 24,
+    },
+
+
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 12,
+    },
+
+
+    eyebrow: {
+      fontSize: 10,
+      letterSpacing: 1.6,
+      fontWeight: '800',
+    },
+
+
+    title: {
+      fontSize: 32,
+      fontWeight: '900',
+      marginTop: 4,
+    },
+
+
+    subtitle: {
+      fontSize: 13,
+      lineHeight: 19,
+      maxWidth: 305,
+      marginTop: 6,
+    },
+
+
+    badge: {
+      width: 46,
+      height: 46,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+
+    content: {
+      padding: 18,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DEMO BANNER
+    |--------------------------------------------------------------------------
+    */
+
+    demoBanner: {
+      borderWidth: 1,
+      borderRadius: 17,
+      padding: 13,
+      flexDirection: 'row',
+      gap: 10,
+      marginBottom: 13,
+    },
+
+
+    demoIcon: {
+      width: 34,
+      height: 34,
+      borderRadius: 11,
+      backgroundColor: '#D66B8215',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+
+    demoTitle: {
+      fontWeight: '900',
+      fontSize: 13,
+    },
+
+
+    demoText: {
+      fontSize: 11,
+      lineHeight: 16,
+      marginTop: 3,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PHOTO
+    |--------------------------------------------------------------------------
+    */
+
+    photoCard: {
+      height: 250,
+      borderWidth: 1,
+      borderRadius: 24,
+      overflow: 'hidden',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+
+    photo: {
+      width: '100%',
+      height: '100%',
+    },
+
+
+    photoEmpty: {
+      alignItems: 'center',
+      paddingHorizontal: 28,
+    },
+
+
+    cameraCircle: {
+      width: 70,
+      height: 70,
+      borderRadius: 35,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 13,
+    },
+
+
+    photoTitle: {
+      fontSize: 17,
+      fontWeight: '800',
+      textAlign: 'center',
+    },
+
+
+    photoHint: {
+      fontSize: 12,
+      textAlign: 'center',
+      marginTop: 6,
+    },
+
+
+    changePill: {
+      position: 'absolute',
+      top: 12,
+      right: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 18,
+      flexDirection: 'row',
+      gap: 5,
+      alignItems: 'center',
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUTTONS
+    |--------------------------------------------------------------------------
+    */
+
+    actionRow: {
+      flexDirection: 'row',
+      gap: 9,
+      marginTop: 12,
+    },
+
+
+    demoButton: {
+      flex: 1,
+      minHeight: 52,
+      borderWidth: 1.5,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      gap: 7,
+    },
+
+
+    demoButtonText: {
+      fontSize: 13,
+      fontWeight: '800',
+    },
+
+
+    liveButton: {
+      flex: 1.25,
+      borderRadius: 15,
+      overflow: 'hidden',
+    },
+
+
+    liveGradient: {
+      minHeight: 52,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      gap: 7,
+    },
+
+
+    liveText: {
+      color: '#FFF',
+      fontSize: 13,
+      fontWeight: '800',
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | INFO
+    |--------------------------------------------------------------------------
+    */
+
+    infoRow: {
+      flexDirection: 'row',
+      gap: 7,
+      alignItems: 'center',
+      marginVertical: 11,
+      paddingHorizontal: 3,
+    },
+
+
+    infoText: {
+      fontSize: 10.5,
+      flex: 1,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ERROR
+    |--------------------------------------------------------------------------
+    */
+
+    error: {
+      flexDirection: 'row',
+      gap: 8,
+      alignItems: 'center',
+      borderWidth: 1,
+      padding: 11,
+      borderRadius: 12,
+      marginBottom: 12,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROCESSING
+    |--------------------------------------------------------------------------
+    */
+
+    processing: {
+      padding: 18,
+      borderRadius: 18,
+      alignItems: 'center',
+      marginBottom: 14,
+    },
+
+
+    processingTitle: {
+      fontWeight: '800',
+      marginTop: 9,
+    },
+
+
+    processingText: {
+      fontSize: 11,
+      marginTop: 4,
+      textAlign: 'center',
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESULT HEADER
+    |--------------------------------------------------------------------------
+    */
+
+    resultHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 10,
+      marginBottom: 12,
+      gap: 10,
+    },
+
+
+    sectionBlock: {
+      marginTop: 20,
+      marginBottom: 10,
+    },
+
+
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: '900',
+    },
+
+
+    sectionSub: {
+      fontSize: 11,
+      marginTop: 3,
+      lineHeight: 16,
+    },
+
+
+    scoreCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+
+    score: {
+      fontSize: 21,
+      fontWeight: '900',
+    },
+
+
+    scoreLabel: {
+      fontSize: 8,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SUMMARY
+    |--------------------------------------------------------------------------
+    */
+
+    summaryCard: {
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 15,
+    },
+
+
+    summaryTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 11,
+    },
+
+
+    typeIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 13,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+
+    metricLabel: {
+      fontSize: 10,
+    },
+
+
+    typeValue: {
+      fontSize: 17,
+      fontWeight: '900',
+      marginTop: 2,
+    },
+
+
+    confidence: {
+      alignItems: 'flex-end',
+    },
+
+
+    confidenceValue: {
+      fontSize: 16,
+      fontWeight: '900',
+    },
+
+
+    confidenceLabel: {
+      fontSize: 8,
+      marginTop: 2,
+    },
+
+
+    summaryText: {
+      fontSize: 12,
+      lineHeight: 18,
+      marginTop: 12,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | METRICS
+    |--------------------------------------------------------------------------
+    */
+
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 9,
+    },
+
+
+    metricCard: {
+      width: '48.5%',
+      minHeight: 150,
+      borderWidth: 1,
+      borderRadius: 16,
+      padding: 12,
+    },
+
+
+    metricTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+
+
+    metricStatus: {
+      fontSize: 8,
+      fontWeight: '800',
+    },
+
+
+    metricName: {
+      fontSize: 11,
+      marginTop: 8,
+    },
+
+
+    metricValue: {
+      fontSize: 24,
+      fontWeight: '900',
+      marginTop: 1,
+    },
+
+
+    progressTrack: {
+      height: 5,
+      borderRadius: 5,
+      overflow: 'hidden',
+      marginTop: 7,
+    },
+
+
+    progressFill: {
+      height: '100%',
+      borderRadius: 5,
+      backgroundColor: '#D66B82',
+    },
+
+
+    metricDescription: {
+      fontSize: 9.5,
+      lineHeight: 14,
+      marginTop: 8,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | COLLAPSIBLE
+    |--------------------------------------------------------------------------
+    */
+
+    collapsible: {
+      borderWidth: 1,
+      borderRadius: 17,
+      marginBottom: 9,
+      overflow: 'hidden',
+    },
+
+
+    collapsibleHeader: {
+      minHeight: 54,
+      paddingHorizontal: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+
+
+    collapsibleLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 9,
+    },
+
+
+    collapsibleTitle: {
+      fontSize: 14,
+      fontWeight: '800',
+    },
+
+
+    collapsibleBody: {
+      paddingHorizontal: 14,
+      paddingBottom: 8,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ROUTINE
+    |--------------------------------------------------------------------------
+    */
+
+    routineRow: {
+      flexDirection: 'row',
+      gap: 10,
+      paddingVertical: 11,
+      borderBottomWidth: 1,
+    },
+
+
+    stepIcon: {
+      width: 34,
+      height: 34,
+      borderRadius: 11,
+      backgroundColor: '#D66B8212',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+
+    stepTitle: {
+      fontSize: 12.5,
+      fontWeight: '800',
+    },
+
+
+    stepProduct: {
+      fontSize: 10,
+      marginTop: 2,
+    },
+
+
+    stepInstruction: {
+      fontSize: 10,
+      lineHeight: 14,
+      marginTop: 4,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PRODUCTS
+    |--------------------------------------------------------------------------
+    */
+
+    productRow: {
+      flexDirection: 'row',
+      gap: 10,
+      paddingVertical: 11,
+      borderBottomWidth: 1,
+    },
+
+
+    productIcon: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      backgroundColor: '#D66B8212',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+
+    productName: {
+      fontSize: 12.5,
+      fontWeight: '800',
+    },
+
+
+    productWhy: {
+      fontSize: 10,
+      lineHeight: 14,
+      marginTop: 3,
+    },
+
+
+    productMeta: {
+      fontSize: 9,
+      marginTop: 4,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | WARDROBE
+    |--------------------------------------------------------------------------
+    */
+
+    adviceRow: {
+      flexDirection: 'row',
+      gap: 9,
+      paddingVertical: 8,
+    },
+
+
+    adviceDot: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: '#D66B8212',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+
+    adviceNumber: {
+      fontSize: 10,
+      fontWeight: '900',
+      color: '#D66B82',
+    },
+
+
+    adviceText: {
+      flex: 1,
+      fontSize: 11,
+      lineHeight: 17,
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROGRESS
+    |--------------------------------------------------------------------------
+    */
+
+    progressCard: {
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 14,
+    },
+
+
+    progressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginVertical: 7,
+    },
+
+
+    progressLabelRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 5,
+    },
+
+
+    progressLabel: {
+      fontSize: 11,
+      fontWeight: '700',
+    },
+
+
+    progressChange: {
+      fontSize: 10,
+      fontWeight: '800',
+    },
+
+
+    progressValue: {
+      width: 30,
+      textAlign: 'right',
+      fontSize: 12,
+      fontWeight: '900',
+    },
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FOOTER
+    |--------------------------------------------------------------------------
+    */
+
+    footerCard: {
+      marginTop: 16,
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 16,
+    },
+
+
+    footerTitle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+
+
+    footerTitleText: {
+      fontSize: 14,
+      fontWeight: '900',
+    },
+
+
+    footerText: {
+      fontSize: 11,
+      lineHeight: 17,
+      marginTop: 8,
+    },
+
+  });
+```
+
+---
+
+# What this gives you immediately
+
+After replacing those two files, the Skin tab should **not be empty**.
+
+The initial state is:
+
+```tsx
+const [result, setResult] =
+  useState<SkinMockResult | any>(
+    SKIN_MOCK_RESULT
+  );
+```
+
+That single design decision is important.
+
+It means the app has data **before the user does anything**.
+
+The screen therefore immediately has:
+
+```text
+YOUCAM SKIN AI • DEMO READY
+
+Skin Care
+
+Scan your skin, understand the signals,
+then connect beauty prep with your wardrobe.
+
+Mock data is ON
+
+Optional: add a selfie
+
+[ Load Demo Scan ] [ Analyze ]
+
+Your Skin Snapshot
+
+84
+score
+
+Skin type
+Combination
+
+92%
+demo confidence
+```
+
+Then:
+
+```text
+SKIN CONCERNS
+
+Hydration       78
+Oiliness        46
+Texture         72
+Pores           39
+Redness         28
+Blemishes       18
+Radiance        81
+Dark Spots      61
+Fine Lines      67
+```
+
+Then:
+
+```text
+PERSONALIZED ROUTINE
+
+Morning routine
+  1. Cleanse
+  2. Hydrate
+  3. Moisturize
+  4. Protect
+
+Evening routine
+  1. Cleanse
+  2. Treat
+  3. Restore
+```
+
+Then:
+
+```text
+RECOMMENDED PRODUCTS
+
+5 demo products
+```
+
+Then:
+
+```text
+SKIN × WARDROBE
+
+Today's style connection
+```
+
+Then:
+
+```text
+PROGRESS PREVIEW
+
+Hydration
+Texture
+Radiance
+Redness
+```
+
+---
+
+# Replit commands
+
+After pasting the two files, restart the Expo app.
+
+If Replit has a terminal, run:
+
+```bash
+npm install
+```
+
+Then:
+
+```bash
+npx expo start
+```
+
+If your project already has its normal Replit start command, simply restart that command instead.
+
+You **do not need to install another skincare library** for this implementation.
+
+---
+
+# One important thing to check
+
+Your existing project must already have this route registered in:
+
+```text
+app/(tabs)/_layout.tsx
+```
+
+It should have something equivalent to:
+
+```tsx
+<Tabs.Screen
+  name="skin-care"
+  options={{
+    title: 'Skin',
+  }}
+/>
+```
+
+If the **Skin tab itself is missing**, the two files above won't make it appear in navigation. The screen file exists, but Expo Router still needs the tab registered.
+
+Also make sure the file name is **exactly**:
+
+```text
+skin-care.tsx
+```
+
+inside:
+
+```text
+app/(tabs)/
+```
+
+not:
+
+```text
+app/skin-care.tsx
+```
+
+and not:
+
+```text
+app/(tabs)/skin.tsx
+```
+
+---
+
+## If you want the absolute simplest version
+
+If Replit is throwing dependency/import errors and you just want to prove that **something renders**, you can temporarily replace the entire `skin-care.tsx` with this minimal version:
+
+```tsx
+import React from 'react';
+
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
+export default function SkinCareScreen() {
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+    >
+      <Text style={styles.eyebrow}>
+        YOUCAM SKIN AI
+      </Text>
+
+      <Text style={styles.title}>
+        Skin Care
+      </Text>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>
+          Your Skin Snapshot
+        </Text>
+
+        <Text style={styles.score}>
+          84
+        </Text>
+
+        <Text style={styles.type}>
+          Combination Skin
+        </Text>
+
+        <View style={styles.metric}>
+          <Text>Hydration</Text>
+          <Text>78</Text>
+        </View>
+
+        <View style={styles.metric}>
+          <Text>Oiliness</Text>
+          <Text>46</Text>
+        </View>
+
+        <View style={styles.metric}>
+          <Text>Texture</Text>
+          <Text>72</Text>
+        </View>
+
+        <View style={styles.metric}>
+          <Text>Pores</Text>
+          <Text>39</Text>
+        </View>
+
+        <View style={styles.metric}>
+          <Text>Redness</Text>
+          <Text>28</Text>
+        </View>
+
+        <View style={styles.metric}>
+          <Text>Blemishes</Text>
+          <Text>18</Text>
+        </View>
+
+        <View style={styles.metric}>
+          <Text>Radiance</Text>
+          <Text>81</Text>
+        </View>
+
+        <View style={styles.metric}>
+          <Text>Dark Spots</Text>
+          <Text>61</Text>
+        </View>
+
+        <View style={styles.metric}>
+          <Text>Fine Lines</Text>
+          <Text>67</Text>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>
+          Morning Routine
+        </Text>
+
+        <Text>
+          1. Gentle Daily Cleanser
+        </Text>
+
+        <Text>
+          2. Hydrating Serum
+        </Text>
+
+        <Text>
+          3. Barrier Cream
+        </Text>
+
+        <Text>
+          4. Daily SPF 30+
+        </Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>
+          Evening Routine
+        </Text>
+
+        <Text>
+          1. Gentle Daily Cleanser
+        </Text>
+
+        <Text>
+          2. Calming Recovery Serum
+        </Text>
+
+        <Text>
+          3. Barrier Cream
+        </Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>
+          Skin × Wardrobe
+        </Text>
+
+        <Text>
+          Choose soft neutral colors for a
+          polished everyday look.
+        </Text>
+
+        <Text>
+          Pair the navy blazer with the
+          white tee.
+        </Text>
+
+        <Text>
+          Use the leather jacket with the
+          silk blouse for evening styling.
+        </Text>
+      </View>
+
+      <Text style={styles.disclaimer}>
+        Demo data only. These values are
+        fictional and are not medical
+        diagnoses.
+      </Text>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FBF7F1',
+  },
+
+  content: {
+    padding: 20,
+    paddingTop: 60,
+    paddingBottom: 100,
+  },
+
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+    color: '#C95F76',
+  },
+
+  title: {
+    fontSize: 36,
+    fontWeight: '900',
+    marginTop: 5,
+    marginBottom: 20,
+  },
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#E8DDE0',
+  },
+
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 15,
+  },
+
+  score: {
+    fontSize: 54,
+    fontWeight: '900',
+    color: '#C95F76',
+  },
+
+  type: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 15,
+  },
+
+  metric: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+
+  disclaimer: {
+    fontSize: 11,
+    lineHeight: 17,
+    color: '#777777',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+});
+```
+
+**I recommend starting with the full two-file version above.** If that produces an import/build error, use the minimal version temporarily: that will tell us whether the problem is the **Skin screen itself** or one of the existing Expo dependencies/imports.

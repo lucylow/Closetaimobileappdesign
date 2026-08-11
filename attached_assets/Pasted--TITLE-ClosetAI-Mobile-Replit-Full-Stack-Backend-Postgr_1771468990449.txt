@@ -1,0 +1,423 @@
+
+
+TITLE: ClosetAI Mobile – Replit Full‑Stack Backend (PostgreSQL, Object Storage, Connectors, AI)
+You are a senior full‑stack engineer and platform architect building the backend stack for the ClosetAI mobile app, running entirely on Replit with:
+Replit PostgreSQL for structured data.
+Replit Object Storage for images and generated media.
+Replit Connectors for auth, payments, SMS, and external APIs.
+Replit AI for text generation and assistant behavior.
+A Node.js/TypeScript server (Express or Fastify) exposing REST APIs consumed by the React Native app described in the previous prompt.
+Your task:
+Produce a long, detailed, high‑level backend spec and code scaffold (equivalent to 15+ pages of text) that a coding assistant can turn into a working full-stack ClosetAI service on Replit. Focus on:
+Architecture
+Database schema
+API design
+Server code structure
+AI integration patterns
+Credit/usage model and demo mode
+Security and multi‑environment configuration
+You must not assume any external infra beyond what Replit provides. No separate AWS, GCP, or custom Kubernetes clusters. Everything is Replit-native.
+
+0. Tech Stack & High-Level Concepts
+Use:
+Node.js + TypeScript (ES modules or CommonJS, but pick one and stick to it).
+Express as the HTTP framework.
+Replit PostgreSQL for all relational data: users, wardrobe items, outfits, jobs, logs.
+Replit Object Storage for:
+Original wardrobe photos
+User selfies for try-on
+Generated try-on results / stylized images
+Replit Connectors for:
+Authentication (e.g., Replit Auth or OAuth with providers).
+Optional payments (Stripe connector).
+SMS/email notifications (e.g., Twilio/mail connector).
+Replit AI for:
+Outfit explanations ("why this outfit").
+Caption + hashtag generation.
+Style suggestions / assistant responses.
+You will design a modular server with:
+src/server.ts – entrypoint.
+src/config/* – environment/config management for Replit.
+src/db/* – PostgreSQL client, schema, migrations, data access helpers.
+src/storage/* – wrappers around Replit Object Storage.
+src/ai/* – AI helper modules (prompt templates, call wrappers).
+src/routes/* – Express routers grouped by domain.
+src/services/* – business logic services orchestrating DB + storage + AI.
+src/middleware/* – auth, demo mode, logging, error handling, rate limiting.
+Provide high‑level TypeScript code for each of these areas.
+
+1. Environment & Configuration (Replit-Aware)
+Design a configuration layer that is Replit-first:
+src/config/env.ts
+Read from process.env keys that Replit sets, plus any custom secrets:
+DATABASE_URL or Replit PostgreSQL connection string.
+Object Storage credentials / endpoint (Replit-specific).
+REPLIT_AI_MODEL (e.g., gpt-4.1-mini).
+STRIPE_API_KEY (if using Stripe connector).
+DEMO_MODE (default true for dev).
+JWT_SECRET (if you need a custom token).
+Export a typed config object:
+ts
+export const config = {
+  nodeEnv: 'development' | 'production',
+  demoMode: boolean,
+  db: { url: string },
+  storage: { bucket: string, baseUrl: string },
+  ai: { model: string },
+  auth: { jwtSecret: string },
+  billing: { stripeKey?: string },
+};
+
+
+Describe how Replit secrets should be set (no hard‑coding). Provide example .env keys (even if Replit UI is used instead of .env).
+src/config/logging.ts
+Simple logger using console wrappers or a small logger library.
+Ensure logs include requestId, userId, and key context where possible.
+Write TypeScript for env.ts and a minimal logging.ts.
+
+2. Database Schema (PostgreSQL on Replit)
+Design a relational schema that supports the mobile app features:
+Tables:
+users
+id (UUID primary key)
+email (unique, nullable if guest)
+display_name
+auth_provider (e.g. replit, password, apple, google)
+created_at, updated_at
+is_guest boolean
+style_profile JSONB (colors, styles, fit prefs)
+metrics JSONB (basic aggregated usage)
+sessions or auth_tokens
+id (UUID)
+user_id FK -> users
+token (hashed)
+expires_at
+created_at
+wardrobe_items
+id (UUID)
+user_id FK
+name
+category (enum-ish: top, bottom, dress, outerwear, shoes, accessory)
+color
+brand
+notes
+image_key (object storage key/path)
+metadata JSONB (vision-extracted attributes, tags)
+created_at, updated_at
+usage_count, last_worn_at
+outfits
+id (UUID)
+user_id FK
+name (optional)
+items (array of wardrobe item IDs or JSONB)
+occasion (text)
+weather_tag (text)
+score numeric
+explanation text
+created_at
+outfit_feedback
+id UUID
+user_id FK
+outfit_id FK
+rating (integer or enum: -1, 0, 1)
+notes text
+created_at
+tryon_jobs
+id UUID
+user_id FK
+input_selfie_key (storage key)
+garment_item_ids (array or JSONB)
+status (queued, processing, completed, failed)
+result_image_key (nullable)
+error_message (nullable)
+created_at, updated_at
+content_jobs
+id UUID
+user_id FK
+outfit_id FK
+status
+caption text
+hashtags text[]
+image_key (optional – stylized image)
+created_at, updated_at
+usage_credits
+user_id FK (PK)
+credits integer
+updated_at
+events_log
+id UUID
+user_id FK nullable
+type (string)
+payload JSONB
+created_at
+Define:
+A migrations folder with SQL or a small TS migration runner.
+Representative SQL CREATE TABLE statements for all tables.
+Index recommendations (e.g., on user_id, created_at, status).
+Write high‑level migration SQL for each table, plus notes on how to run migrations in Replit.
+
+3. Database Access Layer
+Create a simple DB layer:
+src/db/client.ts
+Use Replit’s PostgreSQL driver or pg wired to Replit’s connection string.
+Export a query function with typed generics.
+src/db/repositories/*
+UserRepository
+WardrobeRepository
+OutfitRepository
+TryOnJobRepository
+ContentJobRepository
+UsageCreditsRepository
+EventsLogRepository
+Each repository exposes functions like:
+UserRepository:
+findById
+findByEmail
+createGuestUser
+createUser
+updateStyleProfile
+WardrobeRepository:
+listByUser
+createItem
+updateItem
+deleteItem
+incrementUsage
+OutfitRepository:
+listForUser
+saveOutfit
+getRecommendationsSeedData (e.g., pulling wardrobe & feedback).
+Write high-level TypeScript for:
+client.ts
+One full repository implementation (WardrobeRepository.ts as example)
+Function signatures for the rest.
+
+4. Object Storage Layer (Replit Object Storage)
+Design an abstraction for storing images:
+src/storage/objectStorage.ts
+Functions:
+getWardrobeItemKey(userId: string, itemId: string): string
+getSelfieKey(userId: string, jobId: string): string
+getTryOnResultKey(userId: string, jobId: string): string
+uploadBuffer(buffer: Buffer, key: string, contentType: string)
+getSignedDownloadUrl(key: string, expiresInSeconds?: number)
+deleteObject(key: string)
+Assume Replit Object Storage SDK or S3-compatible API.
+Document any assumptions as comments.
+Emphasize that all media referenced by the mobile app will use signed URLs, not public buckets.
+Provide TypeScript code for objectStorage.ts with placeholder SDK use and TODOs.
+
+5. AI Integration (Replit AI)
+ClosetAI backend uses AI for:
+Outfit explanations.
+Caption & hashtag generation.
+Style assistant chat (optional).
+Create:
+src/ai/models.ts
+Set default Replit AI model (e.g., gpt-4.1-mini).
+Provide a function getModel() that returns model name from config.
+src/ai/prompts.ts
+Prompt templates:
+buildOutfitExplanationPrompt(userProfile, outfit, weather, occasion)
+buildCaptionPrompt(outfit, tone, platform)
+buildStyleAdvicePrompt(userQuestion, wardrobeSample)
+src/ai/aiClient.ts
+Wrapper around Replit AI SDK or generic HTTP call with the agreed model.
+Functions:
+generateOutfitExplanation(args)
+generateCaptionAndHashtags(args)
+generateStyleAdvice(args)
+Write high-level TypeScript for these modules, including example prompts and pseudo calls to Replit AI.
+
+6. Connectors: Auth, Payments, Notifications
+Use Replit Connectors conceptually (describe in code and comments):
+Auth Connector
+src/services/authService.ts
+Support:
+Sign in with email/password (fallback).
+Optionally integrate Replit’s auth or OAuth connectors.
+Functions:
+registerUser(email, password) (for basic scenario).
+loginUser(email, password).
+createGuestUser().
+Issue JWTs for the mobile app, or use Replit session tokens if available.
+Payments Connector (Stripe)
+Optional, but define:
+src/services/billingService.ts
+createCheckoutSession(userId, creditsPackageId)
+handleStripeWebhook(event) (if using webhooks).
+On success, update usage_credits.credits.
+Notifications Connector
+src/services/notificationService.ts
+Functions:
+sendOnboardingEmail(user)
+sendTryOnReadySms(user, jobId)
+Abstract these calls so they can be mocked or wired to SMS/email connectors.
+Provide high‑level TypeScript for authService.ts and billingService.ts (interfaces + key functions).
+
+7. Business Services (Domain Logic)
+Create service modules that orchestrate DB, storage, and AI:
+src/services/wardrobeService.ts
+Functions:
+getUserWardrobe(userId)
+addWardrobeItem(userId, input, imageBuffer)
+Save image via object storage.
+Create DB record.
+updateWardrobeItem(userId, itemId, patch)
+deleteWardrobeItem(userId, itemId)
+src/services/outfitService.ts
+getRecommendations(userId, filters?)
+Pull wardrobe, user profile, feedback, maybe weather from a Connector.
+Return a list of Outfit objects with scores and tags.
+saveOutfit(userId, outfitData)
+rateOutfit(userId, outfitId, rating, notes?)
+explainOutfit(userId, outfitId)
+Fetch outfit + user style profile, call Replit AI.
+src/services/tryOnService.ts
+createTryOnJob(userId, selfieBuffer, garmentItemIds[])
+Store selfie in object storage.
+Insert tryon_jobs row with status queued.
+Optionally push job into a simple queue (DB-based or in-memory).
+getTryOnJob(userId, jobId)
+processTryOnJob(job) – called from a worker:
+(If external VTO is available via Connector) call that; otherwise, simulate by copying placeholder image.
+Update tryon_jobs with status + result_image_key.
+src/services/contentService.ts
+createContentJob(userId, outfitId, tone, platform)
+getContentJob(userId, jobId)
+processContentJob(job) – call Replit AI to generate caption/hashtags/image stub.
+Write function signatures and high-level implementation for these services in TypeScript.
+
+8. HTTP API Design (Express Routes)
+Create Express routers mapping to mobile app needs:
+src/routes/authRoutes.ts
+POST /auth/guest – create guest user, return token.
+POST /auth/register – email/password register.
+POST /auth/login – login and token issue.
+GET /auth/me – get current user (requires auth middleware).
+src/routes/wardrobeRoutes.ts
+GET /wardrobe – list items for user.
+POST /wardrobe – create item + upload image (use multipart or pre-signed key pattern).
+PATCH /wardrobe/:id
+DELETE /wardrobe/:id
+src/routes/outfitRoutes.ts
+GET /outfits/recommendations – query outfits for user, optional filters.
+POST /outfits – save custom outfit.
+POST /outfits/:id/feedback – rate outfit.
+POST /outfits/:id/explain – AI explanation.
+src/routes/tryOnRoutes.ts
+POST /tryon/jobs – create try-on job (selfie + garment IDs).
+GET /tryon/jobs/:id – get job status and signed result URL.
+src/routes/contentRoutes.ts
+POST /content/jobs – create content job (outfit + tone + platform).
+GET /content/jobs/:id – get caption/hashtags/image.
+src/routes/settingsRoutes.ts
+GET /settings/profile
+PATCH /settings/profile – update style preferences.
+src/routes/adminRoutes.ts (optional)
+GET /admin/users
+GET /admin/usage
+POST /admin/grant-credits
+Each route should:
+Use an authMiddleware to attach req.user.
+Return JSON with { success, data, error? }.
+Handle DEMO_MODE short‑circuit (return fixtures instead of calling heavy services).
+Write high-level TS code for:
+src/server.ts – bootstrapping Express, middlewares, route mounting.
+One full router example (wardrobeRoutes.ts).
+The authMiddleware in src/middleware/authMiddleware.ts.
+
+9. Demo Mode and Credit Model
+Define a flexible Demo Mode + credit usage semantics:
+DEMO_MODE = true behavior:
+authRoutes:
+/auth/guest always available, returns a dummy guest user.
+wardrobeRoutes:
+Use in-memory or seeded demo wardrobe for certain demo user IDs.
+outfitRoutes / tryOnRoutes / contentRoutes:
+Instead of calling AI or external VTO, respond with canned results and stored fixture images from Object Storage.
+usage_credits:
+Each user has a credit balance.
+Different operations cost credits (configurable table or constants):
+Try-on HD: 10 credits.
+Outfit explanation: 1 credit.
+Caption generation: 1 credit.
+Include a helper:
+checkAndConsumeCredits(userId, cost) – atomic transaction.
+In Demo Mode, credits are not consumed but still tracked for analytics.
+Write TypeScript:
+src/services/creditService.ts with:
+getCredits(userId)
+checkAndConsumeCredits(userId, cost)
+grantCredits(userId, amount)
+Include logic to bypass consumption in Demo Mode while still logging usage events.
+
+10. Background Processing / Jobs
+Since Replit doesn’t have a full queue infra by default, design a simple job processing mechanism:
+DB-backed job tables: tryon_jobs, content_jobs.
+A lightweight worker loop:
+src/worker.ts:
+Periodically (every N seconds) poll for jobs with status = 'queued'.
+Process them via tryOnService.processTryOnJob or contentService.processContentJob.
+Mark status and store result keys.
+Guard with NODE_ENV or WORKER_ENABLED so it doesn’t run on every Repl instance.
+Describe in comments how this worker could be run in Replit (e.g., a separate process, or triggered via HTTP endpoint/cron-like mechanism).
+Write high-level TS code for worker.ts and job polling logic.
+
+11. Security, Rate Limiting, and Logging
+Add cross-cutting concerns:
+src/middleware/requestLogger.ts
+Log incoming requests with method, path, userId, latency.
+src/middleware/errorHandler.ts
+Catch errors, log them, and send JSON with sanitized messages.
+src/middleware/rateLimiter.ts
+Simple in-memory or DB-backed rate limiter per user/IP.
+Configurable limits for heavy routes (try-on, content jobs).
+Input validation:
+Use a light schema validation library (e.g., Zod) for request bodies.
+Include TypeScript examples for errorHandler and requestLogger.
+
+12. Integration with the React Native App
+Describe how the mobile app will talk to this backend:
+Base URL: (e.g.) https://<your-repl>.repl.co/api.
+Auth flow:
+Mobile calls /auth/guest or /auth/login.
+Stores token.
+Sends Authorization: Bearer <token> on subsequent requests.
+Wardrobe:
+Mobile uses pre-signed URLs or direct upload endpoints (you can choose:
+Option A: POST /wardrobe with multipart image.
+Option B: POST /wardrobe/upload-url to get signed URL then PUT image, followed by metadata create).
+Try-on:
+Mobile posts selfie + garment IDs -> receives jobId.
+Polls /tryon/jobs/:id until status === 'completed', then loads signed URL.
+Content:
+Mobile posts outfit info, receives jobId.
+Polls for caption and hashtags.
+Add comments in route handlers showing expected mobile request/response shapes.
+
+13. Minimal README for Backend (on Replit)
+At the end of your answer, include a mini README for the backend:
+Project overview and capabilities.
+Setup steps on Replit:
+Create a Repl with Node + PostgreSQL + Object Storage.
+Configure secrets (DATABASE_URL, storage keys, AI model, DEMO_MODE).
+Install dependencies.
+Run migrations (command).
+Start server.
+Optionally start worker.
+Example curl commands to:
+Create guest user.
+List wardrobe items.
+Create demo wardrobe item.
+Create a try-on job in Demo Mode and poll status.
+
+14. Style & Output Requirements
+Use TypeScript in all backend code snippets.
+Favor clear, modular, production-style structure over complete implementation.
+Add plenty of comments explaining:
+Where Replit-specific features plug in.
+Where further integration work is needed.
+Avoid external infra; assume all persistence and AI is Replit-native.
+Do not ask follow-up questions; make reasonable assumptions and document them in comments.
+End of prompt.
+

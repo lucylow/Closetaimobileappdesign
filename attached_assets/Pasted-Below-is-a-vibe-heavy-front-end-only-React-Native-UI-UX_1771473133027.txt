@@ -1,0 +1,873 @@
+Below is a vibe-heavy, front-end-only React Native UI/UX prompt you can paste into Replit’s AI / Ghostwriter (or any coding assistant). It tells it exactly how to build the mobile visuals and interaction layer for ClosetAI on iOS and Android.
+
+TITLE: ClosetAI Mobile – React Native UI/UX & Visuals (Front-End Vibe Code Prompt)
+You are a senior React Native UI/UX engineer and motion designer building the mobile interface for ClosetAI – Your Personal Wardrobe Stylist.
+Your mission:
+ Design and implement a beautiful, highly interactive React Native front-end (TypeScript, Expo) that feels like a polished consumer app: smooth animations, glassy cards, elevated visuals, and clear flows for scanning wardrobe, getting outfits, running try-on, and creating content.
+Assume there is a backend, but in this prompt you focus on:
+Screen layouts
+
+
+Component hierarchies
+
+
+Navigation & microinteractions
+
+
+Visual design system (colors, typography, spacing)
+
+
+Demo/mock data so the UI runs without real APIs
+
+
+Produce a long, detailed answer with high-level but concrete TypeScript code for React Native, focusing on UI/UX and visuals for mobile.
+
+0. Tech + Structure (Frontend-Only)
+Use:
+Expo + React Native
+
+
+TypeScript
+
+
+React Navigation (stack + bottom tabs)
+
+
+expo-linear-gradient for backgrounds
+
+
+Optional: react-native-reanimated / react-native-gesture-handler for subtle motion (but keep code approachable)
+
+
+Context/hooks for UI state only (no real network logic; stub with mock data)
+
+
+Project layout (front-end only):
+App.tsx
+
+
+src/navigation/RootNavigator.tsx
+
+
+src/navigation/AppTabs.tsx
+
+
+src/theme/colors.ts
+
+
+src/theme/typography.ts
+
+
+src/theme/spacing.ts
+
+
+src/theme/shadows.ts
+
+
+src/theme/index.ts
+
+
+src/components/common/*
+
+
+src/components/home/*
+
+
+src/components/wardrobe/*
+
+
+src/components/outfits/*
+
+
+src/components/tryon/*
+
+
+src/components/content/*
+
+
+src/components/settings/*
+
+
+src/screens/HomeScreen.tsx
+
+
+src/screens/WardrobeScreen.tsx
+
+
+src/screens/AddItemScreen.tsx
+
+
+src/screens/OutfitSuggestionsScreen.tsx
+
+
+src/screens/TryOnScreen.tsx
+
+
+src/screens/ContentStudioScreen.tsx
+
+
+src/screens/SettingsScreen.tsx
+
+
+src/screens/OnboardingScreen.tsx
+
+
+src/mock/mockData.ts
+
+
+In your answer, show:
+How App.tsx wires up navigation and theme providers.
+
+
+How each key screen looks visually.
+
+
+How shared UI components are styled.
+
+
+
+1. Visual Design System – Colors, Type, Spacing, Cards
+Design a ClosetAI mobile visual language:
+src/theme/colors.ts
+
+
+Define a palette:
+
+
+Primary: soft violet (#6E4AE0)
+
+
+PrimaryDark: slightly deeper violet
+
+
+Accent: teal (#00C9B7)
+
+
+Background: very light lavender/white
+
+
+Surface: glassy white with slight blur feel
+
+
+TextPrimary: deep ink
+
+
+TextSecondary: muted grey
+
+
+Warning/Error/Success colors
+
+
+Provide the full colors object and export it.
+
+
+src/theme/typography.ts
+
+
+Text styles:
+
+
+titleXL for hero headings
+
+
+title for section titles
+
+
+subtitle
+
+
+body
+
+
+caption
+
+
+Use React Native style objects.
+
+
+src/theme/spacing.ts & src/theme/shadows.ts
+
+
+Spacing scale: xs, sm, md, lg, xl.
+
+
+Shadow presets: soft card shadow, elevated button shadow.
+
+
+src/theme/index.ts
+
+
+Export a theme object bundling colors, typography, spacing, shadows.
+
+
+Provide a useTheme() hook that returns theme.
+
+
+Write TypeScript code for these theme files and include example usage (e.g., how a card uses background, border radius, shadow).
+
+2. Navigation Shell & App Chrome
+Create a navigation shell that feels compact, mobile-first, and polished:
+App.tsx
+
+
+Wrap the app in:
+
+
+NavigationContainer
+
+
+ThemeProvider (custom context hooking into the theme above)
+
+
+Set status bar style (light-content over gradient backgrounds).
+
+
+src/navigation/RootNavigator.tsx
+
+
+Use a stack navigator:
+
+
+On first launch: OnboardingScreen
+
+
+After onboarding: AppTabs (main app)
+
+
+Use a fade/slide transition between onboarding and main app.
+
+
+src/navigation/AppTabs.tsx
+
+
+Bottom tab navigator with 5 tabs:
+
+
+Home
+
+
+Wardrobe
+
+
+Outfits
+
+
+TryOn
+
+
+Studio (Content)
+
+
+Each tab uses:
+
+
+A minimal icon (you can use vector icons with placeholder names).
+
+
+Custom tab bar: pill-shaped background, active indicator dot, slightly raised effect.
+
+
+Show high-level TSX for App.tsx, RootNavigator.tsx, and AppTabs.tsx with focus on layout and styling, not backend.
+
+3. Common UI Components (Vibe, Reusable)
+Define a small library of reusable, vibe-heavy UI components:
+PrimaryButton.tsx
+
+
+Rounded, pill-shaped, gradient background (violet → pink).
+
+
+Optional loading spinner.
+
+
+Large hit area, centered label.
+
+
+SecondaryButton.tsx
+
+
+Transparent with border, subtle shadow.
+
+
+ScreenContainer.tsx
+
+
+Wraps SafeAreaView + ScrollView or View.
+
+
+Applies gradient background at top + subtle fade into plain background.
+
+
+Handles padding consistently.
+
+
+GlassCard.tsx
+
+
+Card with:
+
+
+Rounded corners.
+
+
+Glassmorphism effect (semi-transparent, with border and shadow).
+
+
+Used for wardrobe items, outfits, etc.
+
+
+TagChip.tsx
+
+
+Small pill chip used for categories (Casual, Office, Brunch, etc.).
+
+
+Active/inactive visual state.
+
+
+SectionHeader.tsx
+
+
+Title + optional subtitle + “See all” action on the right.
+
+
+AvatarBubble.tsx
+
+
+Round avatar placeholder used for the user or a mannequin.
+
+
+For each of these, write full TypeScript components with StyleSheet.create styles and comments explaining the UX and visual intent.
+
+4. Onboarding Experience (Mobile First Impressions)
+Create a single Onboarding screen that feels like a mini story:
+src/screens/OnboardingScreen.tsx:
+
+
+Horizontally swipable carousel (or simple stepped view) with 3–4 slides:
+
+
+“Scan your closet” – illustration placeholder, clothing grid.
+
+
+“Get daily outfits” – sample outfit card.
+
+
+“Try things on” – before/after visualization.
+
+
+“Share & create” – content cards preview.
+
+
+Each slide uses:
+
+
+Big title (titleXL).
+
+
+Short, friendly subtitle.
+
+
+Simple vector graphic or Image placeholder.
+
+
+Bottom area:
+
+
+Pagination dots.
+
+
+Primary CTA: “Get started”.
+
+
+Secondary: “Skip, explore in demo mode” (purely UI; hooking later).
+
+
+Implement this screen with TypeScript, using local state to track the active slide, and animate transitions (e.g., opacity/translateY) for a polished feel.
+
+5. Home Screen – Snapshot of Your Closet Day
+src/screens/HomeScreen.tsx:
+Use ScreenContainer.
+
+
+Top section:
+
+
+Greeting: “Good morning, Alex” (hard-coded name is fine for now, or dynamic via mock).
+
+
+Small subtext: “Here’s your ClosetAI plan for today”.
+
+
+A Today’s Outfit hero card:
+
+
+A GlassCard with:
+
+
+Outfit preview thumbnail (grid of mini images).
+
+
+Text: “Soft neutrals for your rainy commute”.
+
+
+Chips: Weather, Occasion, Trend.
+
+
+CTA buttons: “Try this on”, “Another idea”.
+
+
+Quick actions row:
+
+
+Icon buttons for:
+
+
+“Add item”
+
+
+“Scan outfit”
+
+
+“Open Studio”
+
+
+Scrolling area:
+
+
+“Wardrobe at a glance” – show a horizontal scroll of wardrobe item cards.
+
+
+“Recently worn” – small timeline row.
+
+
+Provide TSX and styles for at least the HomeScreen and its main visual subcomponents:
+TodayOutfitCard.tsx
+
+
+QuickActionsRow.tsx
+
+
+WardrobePreviewRow.tsx
+
+
+Use mock data from src/mock/mockData.ts.
+
+6. Wardrobe Screen – Visual Closet Grid
+src/screens/WardrobeScreen.tsx:
+Goal: make the wardrobe feel like a beautiful grid of cards:
+Use a FlatList in a 2-column grid layout.
+
+
+Each WardrobeItemCard:
+
+
+Image preview.
+
+
+Item name, category, color tag.
+
+
+Subtle overlay with usage (“Worn 12x”, “Last worn: 3 days ago”).
+
+
+Top filter chips row:
+
+
+Category chips (All, Tops, Bottoms, Dresses, Outerwear, Shoes, Accessories).
+
+
+When tapped, filter the list (purely in-memory mock logic).
+
+
+Floating “+” action button in bottom-right:
+
+
+Opens AddItemScreen.
+
+
+Implement:
+WardrobeScreen.tsx (full layout).
+
+
+WardrobeItemCard.tsx (glass card with micro-interactions: press effect, subtle scale).
+
+
+WardrobeFilters.tsx (horizontal chip list).
+
+
+
+7. Add Item Screen – Capture & Tag Flow
+src/screens/AddItemScreen.tsx:
+Visual design:
+Step-ish layout inside a single screen:
+
+
+Photo area:
+
+
+Big rounded rectangle with dashed border + icon.
+
+
+If no image: “Tap to add a photo”.
+
+
+Once photo picked: display preview, overlay “Retake” button.
+
+
+Use a placeholder pickImage() function; no real camera integration needed for this prompt, but show how the UI responds.
+
+
+Details form:
+
+
+Fields: Name, Category (dropdown or chips), Color (chips), Brand (optional).
+
+
+Optionally, a tag row: chips for Casual, Office, Evening, Sporty.
+
+
+Save button:
+
+
+PrimaryButton pinned at bottom or sticky footer.
+
+
+Disabled until required fields + photo are set.
+
+
+Write TSX with local useState to manage the pseudo-form, with validation visually (e.g., red border for missing required inputs when the user taps Save).
+
+8. Outfit Suggestions Screen – Scrollable Looks & Explanations
+src/screens/OutfitSuggestionsScreen.tsx:
+Purpose: explore outfits in a visually rich way.
+Layout:
+Filter bar at top:
+
+
+Occasion chips: Everyday, Work, Date, Event, Travel.
+
+
+Weather icons: sun, rain, cold (just UI toggles).
+
+
+List of OutfitCard components in a vertical scroll:
+
+
+Each card shows:
+
+
+Combined outfit preview (2–4 thumbnails).
+
+
+Title: “Minimalist Monday”, “Cozy commute”.
+
+
+Subtext: 1–2 line explanation stub.
+
+
+Tags row: Comfort, On-trend, Low effort, etc.
+
+
+Buttons:
+
+
+“Try this on”
+
+
+“Why this outfit?” (taps open a bottom sheet explanation).
+
+
+Bottom sheet / modal:
+
+
+Shows expanded explanation (placeholder text).
+
+
+Buttons: “Save to favorites”, “Not my style” (UI only).
+
+
+Implement:
+OutfitSuggestionsScreen.tsx
+
+
+OutfitCard.tsx
+
+
+OutfitExplanationSheet.tsx (can use Modal or a simple full-screen overlay with slide-up animation).
+
+
+Use mock outfit data.
+
+9. Try-On Screen – Before/After & Magic Feel
+src/screens/TryOnScreen.tsx:
+Visual goal: emphasize before/after transformation.
+Layout:
+Top: short intro text “Pick a selfie and an item to try on.”
+
+
+Step 1: Selfie picker:
+
+
+Rounded card showing:
+
+
+If none selected: placeholder silhouette + “Add selfie”.
+
+
+If selected: show image, “Change photo” button.
+
+
+Step 2: Wardrobe selector:
+
+
+Horizontal scroll of WardrobeItemCard mini-variants (smaller footprint).
+
+
+Pressing one selects it (highlighted border).
+
+
+Step 3: Result preview:
+
+
+BeforeAfterSlider component:
+
+
+Left side: original.
+
+
+Right side: “AI try-on” placeholder.
+
+
+Slider thumb to reveal more/less.
+
+
+CTA:
+
+
+“Generate try-on” PrimaryButton.
+
+
+While “loading”: show overlay with animated dots and fun copy (“Stitching your look…”).
+
+
+Implement UI for:
+TryOnScreen.tsx
+
+
+SelfiePickerCard.tsx
+
+
+MiniWardrobeScroller.tsx
+
+
+BeforeAfterSlider.tsx (UI-only slider; can use a simple Slider + two Image components, one absolutely positioned).
+
+
+Use static images (URIs) or colored views as stand-ins.
+
+10. Content Studio Screen – Social-First View
+src/screens/ContentStudioScreen.tsx:
+Goal: a mini content editor for social posts.
+Layout:
+Select outfit:
+
+
+Horizontal carousel of outfits; the selected one is enlarged.
+
+
+Caption composer:
+
+
+TextInput area with placeholder: “Write something about your look…”.
+
+
+Row of tone buttons: Chill, Playful, Professional, Poetic.
+
+
+Hashtag row:
+
+
+Chips like #ootd, #minimaliststyle, #capsulewardrobe.
+
+
+Tapping toggles them on/off (highlighted).
+
+
+Preview card:
+
+
+Fake mobile post card: avatar, name, photo, caption with hashtags.
+
+
+Footer:
+
+
+Buttons: “Copy caption”, “Save image” (UI only).
+
+
+PrimaryButton for “Generate new caption” (hooks to nothing for now; animate shimmer to simulate thinking).
+
+
+Implement:
+ContentStudioScreen.tsx
+
+
+OutfitPickerCarousel.tsx
+
+
+PostPreviewCard.tsx
+
+
+Focus on layout, typography, spacing, and microanimations (e.g., pressing tone chips).
+
+11. Settings Screen – Personalization and Demo Mode
+src/screens/SettingsScreen.tsx:
+UI elements:
+Profile header:
+
+
+Avatar bubble.
+
+
+Name + “Wardrobe explorer since 2026”.
+
+
+Sections:
+
+
+Style & Fit:
+
+
+Chips or toggles for style preferences: Minimal, Street, Classic, Bold.
+
+
+Simple slider for “Color boldness” (subtle UI; just state).
+
+
+App Appearance:
+
+
+Toggle: Light / Dark mode.
+
+
+Option: “Reduce motion” (for accessibility).
+
+
+Experience:
+
+
+Toggle: Demo Mode vs Live Mode (UI only – no real backend switching here).
+
+
+About:
+
+
+Static text: version, acknowledgments.
+
+
+Implement:
+SettingsScreen.tsx
+
+
+SettingsSection.tsx
+
+
+ToggleRow.tsx
+
+
+Use nice spacing and icons.
+
+12. Mock Data for UI
+Create src/mock/mockData.ts with:
+mockUser
+
+
+mockWardrobeItems (10–20 items varying categories/colors)
+
+
+mockOutfits
+
+
+mockTryOnImages
+
+
+mockCaptions
+
+
+Show the TypeScript interfaces for each mock type and provide sample data inline.
+
+13. Interaction Patterns & Microanimations
+For key components (GlassCard, PrimaryButton, OutfitCard, WardrobeItemCard):
+On press:
+
+
+Slight scale down (transform: [{ scale: 0.97 }]) with short animation.
+
+
+On long press (optional):
+
+
+Show subtle shadow change or border highlight.
+
+
+Use Animated or react-native-reanimated in simple, approachable ways – keep code short and well-commented.
+
+
+Add a short section in your answer showing how you would wrap cards with Pressable + Animated to achieve the hover/press feel.
+
+14. Accessibility & Responsiveness
+Document and demonstrate:
+accessible and accessibilityLabel on main UI elements (buttons, toggles, cards).
+
+
+Adequate padding and minimum touch size.
+
+
+Use ScrollView or FlatList with proper contentContainerStyle so small devices don’t clip content.
+
+
+Responsive behavior:
+
+
+On small screens: reduce card padding and font sizes slightly.
+
+
+On large screens/tablets: allow more columns or wider cards.
+
+
+Include comments in the code indicating where and how these concerns are addressed.
+
+15. Final Touches: Mini README for the Mobile UI
+At the end of your answer, include a short “README-style” note for developers:
+How to run the Expo app in Replit.
+
+
+Which screens exist and what they demonstrate.
+
+
+How to flip a simple constant (e.g., DEMO_UI = true) to show/hide certain demo-specific banners.
+
+
+Where to plug in real API calls later (e.g., in useEffect placeholders on screens).
+
+
+
+Style Requirements for Your Output
+Use React Native + TypeScript in all code examples.
+
+
+Focus solely on frontend UI/UX and visuals – no real network logic.
+
+
+Provide clear, well-commented components that are easy to copy into a Replit project.
+
+
+Emphasize vibe: smooth, friendly, “I want to tap this” design.
+
+
+Do not ask me any questions; make reasonable assumptions and document them as comments.
+
+
+End of prompt.
+

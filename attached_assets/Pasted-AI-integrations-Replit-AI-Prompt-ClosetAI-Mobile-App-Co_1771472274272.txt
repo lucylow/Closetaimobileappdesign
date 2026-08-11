@@ -1,0 +1,227 @@
+AI integrations—Replit AI Prompt: ClosetAI Mobile App – Complete AI Integrations
+Copy-paste this EXACT prompt into Replit AI Agent / Ghostwriter to build a production-ready React Native mobile app with full AI backend on Replit.
+
+text
+**BUILD COMPLETE ClosetAI mobile app (React Native + Replit AI Backend) – wardrobe stylist with YouCam-style virtual try-on, AI outfit recommendations, smart captions. Use Replit PostgreSQL, Object Storage, Replit AI, and Connectors. iOS/Android ready.**
+
+## 🎯 **PROJECT STRUCTURE (Create ALL files):**
+
+
+REACT NATIVE FRONTEND (Expo):
+├── App.tsx (Navigation + Providers)
+├── src/
+│ ├── navigation/ (RootStack + AppTabs)
+│ ├── screens/ (Home, Wardrobe, TryOn, ContentStudio)
+│ ├── components/ (GlassCard, PrimaryButton, BeforeAfterSlider)
+│ ├── hooks/ (useWardrobe, useTryOn, useAI)
+│ ├── services/ (apiClient.ts, replitAI.ts)
+│ ├── theme/ (colors.ts, typography.ts)
+│ └── mock/ (demoData.ts)
+└── package.json (Expo + React Navigation)
+REPLIT FULLSTACK BACKEND (Node/TS + Express):
+├── server.ts (Express server + CORS)
+├── src/
+│ ├── db/ (pg client, schema, repositories)
+│ ├── storage/ (Replit Object Storage)
+│ ├── ai/ (Replit AI prompts + client)
+│ ├── services/ (wardrobeService, tryOnService)
+│ ├── routes/ (auth, wardrobe, tryon, ai)
+│ └── middleware/ (auth, rateLimit, cors)
+├── migrations/ (PostgreSQL schema)
+└── package.json (express, pg, @replit/ai-sdk)
+text
+
+## 🚀 **REPLIT SETUP COMMANDS (AI Agent executes):**
+
+```bash
+# 1. Create Replit with Node.js + PostgreSQL + Object Storage
+# 2. Install frontend deps
+npm install expo react-native react-navigation @react-navigation/native @react-navigation/bottom-tabs @react-navigation/stack expo-linear-gradient react-native-reanimated react-native-gesture-handler @react-native-async-storage/async-storage
+
+# 3. Install backend deps  
+npm install express pg @replit/database @replit/ai-sdk cors helmet morgan jsonwebtoken zod
+npm install -D @types/pg @types/jsonwebtoken @types/cors typescript ts-node nodemon
+
+# 4. Create PostgreSQL tables (run migrations)
+# 5. Configure Replit Secrets: DATABASE_URL, REPLIT_AI_API_KEY, JWT_SECRET
+
+🧠 REPLIT AI INTEGRATIONS (Core Features):
+1. AI OUTFIT RECOMMENDER
+text
+Replit AI Prompt Template:
+"Given wardrobe: {items}, user style: {profile}, occasion: {occasion}, weather: {weather}, recommend 3 complete outfits. Return JSON: [{name, items:[], score, explanation, tags[]}]"
+
+HomeScreen → POST /api/ai/outfits → real-time recommendations
+Cards show AI confidence score + "Why this?" explanations
+2. YOU CAM-STYLE VIRTUAL TRY-ON
+text
+Frontend flow:
+1. WardrobeScreen → pick garment → TryOnScreen
+2. Camera/selfie picker → `POST /api/tryon/job`
+3. Backend: Replit Object Storage → Replit AI image processing
+4. `BeforeAfterSlider` component shows result
+
+tryOnService.processJob() uses Replit AI for fabric overlay simulation
+Signed Object Storage URLs for all images
+3. AI CONTENT GENERATOR
+text
+Replit AI Prompt: 
+"Create Instagram caption for outfit: {description}, tone: {chill/playful/pro}, hashtags: 5 trending. Return: {caption, hashtags[]}"
+
+ContentStudioScreen → generate captions → copy to clipboard
+PostPreviewCard shows native iOS/Android share sheet mockup
+📱 FRONTEND SCREENS (React Native + Glassmorphism):
+ScreenFlow: Home → Wardrobe → TryOn → Content
+text
+1. HOME: "Good morning ✨" + AI outfit carousel + Quick Actions
+2. WARDROBE: 2-col glass card grid + FAB "+" 
+3. TRYON: Selfie picker + garment carousel + BeforeAfterSlider
+4. CONTENT: Caption composer + PostPreviewCard + Share buttons
+
+Key Components:
+tsx
+GlassCard.tsx (24px radius, rgba(255,255,255,0.25), violet glow)
+PrimaryButton.tsx (gradient #6E4AE0→#A78BFA, press scale 0.97)
+BeforeAfterSlider.tsx (draggable, gradient thumb)
+OutfitCard.tsx (AI score badge, "Why?" microcopy)
+
+🗄️ POSTGRESQL SCHEMA (Replit Database):
+sql
+-- Users & Auth
+CREATE TABLE users (id UUID PRIMARY KEY, email TEXT UNIQUE, style_profile JSONB);
+
+-- Wardrobe Items  
+CREATE TABLE wardrobe_items (
+  id UUID PRIMARY KEY, 
+  user_id UUID REFERENCES users,
+  name TEXT, 
+  image_key TEXT, -- Replit Object Storage
+  category TEXT,
+  ai_tags JSONB
+);
+
+-- AI Jobs (async processing)
+CREATE TABLE ai_jobs (
+  id UUID PRIMARY KEY,
+  user_id UUID,
+  type TEXT, -- 'tryon', 'outfit', 'caption'
+  status TEXT, -- 'queued', 'processing', 'done'
+  input JSONB,
+  result JSONB,
+  image_key TEXT
+);
+
+🌐 EXPRESS API ROUTES (Backend):
+typescript
+// Auth (Replit Auth Connector or JWT)
+POST /api/auth/guest → return JWT token
+POST /api/auth/login → email/password → JWT
+
+// Wardrobe
+POST /api/wardrobe → upload image → Object Storage → ai_tags
+GET  /api/wardrobe → list user's items
+
+// AI Features  
+POST /api/ai/outfits → Replit AI → outfit recommendations
+POST /api/tryon/job → queue try-on job → poll /api/tryon/:id
+POST /api/ai/caption → generate Instagram captions
+
+// Storage
+POST /api/storage/signed-url → get upload URL for images
+GET  /api/storage/:key/signed → temporary download URLs
+
+🤖 REPLIT AI IMPLEMENTATION:
+typescript
+// src/ai/replitAI.ts
+import { ReplitAI } from '@replit/ai-sdk';
+
+const ai = new ReplitAI({ model: 'gpt-4.1-mini' });
+
+export async function generateOutfitRecommendations(wardrobe: any[]) {
+  const prompt = `Recommend 3 outfits from: ${JSON.stringify(wardrobe)}`;
+  const result = await ai.chat.completions.create({
+    messages: [{ role: 'user', content: prompt }],
+    response_format: { type: 'json_object' }
+  });
+  return JSON.parse(result.choices.message.content);
+}
+
+🔌 REPLIT CONNECTORS SETUP:
+text
+✅ PostgreSQL: DATABASE_URL (auto-configured)
+✅ Object Storage: REPLIT_STORAGE_BUCKET  
+✅ Replit AI: REPLIT_AI_API_KEY (Secrets tab)
+✅ Auth: Replit Auth or JWT_SECRET
+✅ Optional: Stripe for premium AI credits
+
+🎨 GLASSMORPHISM DESIGN SYSTEM:
+typescript
+// src/theme/colors.ts
+export const colors = {
+  primary: '#6E4AE0',
+  accent: '#00C9B7',
+  glass: 'rgba(255,255,255,0.25)',
+  gradient: ['#6E4AE0', '#A78BFA']
+};
+
+// Components use StyleSheet with 24px radius, elevation shadows
+
+🚀 DEMO MODE (Hackathon Ready):
+text
+DEMO_MODE=true → 
+✅ No real AI costs (mock responses)
+✅ Pre-seeded wardrobe with 20+ items  
+✅ Static try-on results from Object Storage
+✅ Works without internet/credits
+✅ "Powered by Replit AI" badges everywhere
+
+📋 REPLIT RUN COMMANDS (AI Agent executes):
+bash
+# Terminal 1: Backend
+npm run dev:backend  # nodemon src/server.ts
+
+# Terminal 2: Frontend  
+npx expo start       # QR code for iOS/Android
+
+# Database (one-time)
+npm run migrate      # CREATE TABLE statements
+npm run seed:demo    # 20 wardrobe items + mock user
+
+🎯 SUCCESS CRITERIA (AI Agent verifies):
+text
+✅ [ ] Frontend: expo start → iPhone simulator works
+✅ [ ] Backend: curl POST /api/auth/guest → JWT token  
+✅ [ ] Database: SELECT * FROM wardrobe_items → demo data
+✅ [ ] AI: POST /api/ai/outfits → JSON recommendations
+✅ [ ] Storage: POST /api/storage/signed-url → works
+✅ [ ] Full flow: Home→Wardrobe→TryOn→ContentStudio
+✅ [ ] Glassmorphism UI matches design system
+✅ [ ] "Powered by Replit AI" branding visible
+
+📱 MOBILE TESTING:
+text
+1. Scan QR → iOS Simulator → full app flow
+2. Home → tap AI outfit → TryOnScreen
+3. Pick wardrobe item → BeforeAfterSlider demo
+4. ContentStudio → AI caption → copy to clipboard
+5. Settings → toggle Demo/Live mode
+
+GENERATE COMPLETE WORKING APP. Use Replit PostgreSQL + Object Storage + AI SDK. Production-ready ClosetAI with YouCam-style try-on magic. iOS/Android. Glassmorphism UI. 100% functional in 5 minutes.
+text
+
+***
+
+## 🚀 **REPLIT EXECUTION FLOW:**
+
+
+Paste prompt → Replit AI Agent builds ALL files
+AI runs: npm install → migrations → seed:demo
+Terminal 1: npm run dev:backend (port 3000)
+Terminal 2: npx expo start (QR code)
+Test full flow on iPhone → investor-ready demo
+text
+
+**Result:** **Production ClosetAI app** with **Replit AI outfit recommendations**, **Object Storage images**, **PostgreSQL persistence**, **glassmorphism UI** – **fully functional** in **under 10 minutes**! Perfect for hackathons, client demos, investor pitches. 🚀
+
+
+

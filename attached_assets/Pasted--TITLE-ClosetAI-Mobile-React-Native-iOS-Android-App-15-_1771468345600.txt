@@ -1,0 +1,308 @@
+
+
+TITLE: ClosetAI Mobile – React Native iOS + Android App (15+ pages of high‑level code + architecture spec)
+You are a senior React Native engineer and mobile UX lead building the ClosetAI mobile app: a personal wardrobe stylist that helps users catalog clothes, get AI‑powered outfit suggestions, run virtual try‑on via a backend, and generate social content. The app must run on iOS and Android, and be easy to develop and demo in Replit.
+Your task:
+Produce a single, very long response (15+ pages of text) that defines:
+High‑level React Native (TypeScript) code and architecture (no need to be 100% runnable; focus on structure, components, hooks, and data flows).
+File layout, navigation, screen scaffolds, and core hooks.
+Clear TODOs where backend integration or native modules would plug in.
+Assume there is an existing ClosetAI backend (web API) and sponsor integrations (Perfect Corp / YouCam, You.com, Stripe, etc.) but this prompt is only for the mobile client. You can call them via REST; do not embed secrets.
+
+0. Tech + Project Setup
+Use:
+React Native + Expo (ideal for Replit dev / simulators).
+TypeScript throughout.
+React Navigation for stack + tab navigation.
+AsyncStorage for local persistence (tokens, user prefs).
+A thin apiClient.ts for all HTTP calls.
+Use mock/demo data + flags so the app runs without real API keys.
+First, specify:
+Project structure (folders + key files):
+App.tsx
+src/navigation/RootNavigator.tsx
+src/navigation/types.ts
+src/screens/Onboarding/*
+src/screens/Auth/*
+src/screens/Home/*
+src/screens/Wardrobe/*
+src/screens/Outfits/*
+src/screens/TryOn/*
+src/screens/Content/*
+src/screens/Settings/*
+src/components/common/*
+src/components/wardrobe/*
+src/components/outfits/*
+src/hooks/*
+src/services/apiClient.ts
+src/services/demoData.ts
+src/theme/*
+src/store/* (simple context/store or Zustand/MobX, but keep it light).
+A minimal package.json snippet (dependencies only) for Expo/React Native, React Navigation, AsyncStorage, and any light UI libs you want.
+A Replit‑friendly note: how to run expo start (no need to be perfect; just describe commands and assumptions).
+
+1. Core Experience & Flows
+ClosetAI mobile app high‑level flows:
+Onboarding + Auth
+Lightweight onboarding carousel (3–4 slides) explaining “Scan your closet”, “Get outfits”, “Try‑on”, “Share”.
+Optional sign‑in/sign‑up with email/password or social (simplify to email + magic link / OTP for this spec).
+Ability to skip auth and run in Guest Demo Mode.
+Wardrobe Capture
+Screen to:
+Capture a clothing item via camera or select from gallery.
+Show a cropped preview.
+Allow user to tag: category (top, bottom, dress, outerwear, shoes, accessories), color, brand, notes.
+Behind the scenes: call backend /api/items to upload metadata and image key, or in demo mode, simulate.
+Outfit Recommendations
+Screen with:
+Horizontal carousels of recommended outfits.
+Each card shows 2–4 items, trend tags, and reasons (“weather‑ready”, “brunch”, “office”).
+Actions:
+Save outfit.
+Rate outfit (like/neutral/dislike).
+“Explain why” (calls backend explanation endpoint or returns mock string).
+Virtual Try‑On (VTO)
+Screen to pick:
+A base selfie (captured or chosen from gallery).
+One or more garments from wardrobe.
+UI:
+Before/after slider.
+Loading state with progress (“sending to closet brain…”, “generating…”).
+Backend:
+Uses a /api/vton endpoint (abstracted behind tryOnService).
+In demo mode, uses fixture images.
+Content & Sharing
+Simple “Content Studio” screen:
+Select an outfit.
+Generate caption + hashtags + optional styled image.
+Preview as Instagram/TikTok card.
+“Copy caption” and “Save image to device” (no actual social SDK integration needed).
+Settings & Profile
+Set style preferences, body measurements, theme (dark/light), language, and Demo Mode toggle.
+View account info, sign out.
+
+2. Navigation Skeleton (React Navigation)
+Write full TypeScript code for a navigation skeleton:
+App.tsx
+Wraps the app with:
+NavigationContainer
+ThemeProvider (light/dark)
+AuthProvider
+DemoModeProvider
+Decides initial route based on:
+hasSeenOnboarding in AsyncStorage.
+authToken presence.
+src/navigation/RootNavigator.tsx
+Auth Stack:
+Onboarding (OnboardingCarouselScreen)
+Welcome (WelcomeScreen)
+SignIn (SignInScreen)
+Main Tab Navigator (once authenticated or in guest mode):
+Home
+Wardrobe
+Outfits
+TryOn
+Content
+Settings (in a drawer or tab; your choice, but specify).
+src/navigation/types.ts
+Define RootStackParamList, AuthStackParamList, MainTabParamList.
+Use NativeStackScreenProps + BottomTabScreenProps for typing.
+Write high‑level React Native code for these files, focusing on structure, not pixel‑perfect layout.
+
+3. Theme and Design System
+Define a simple theme system:
+src/theme/colors.ts
+Light and dark palettes inspired by your existing ClosetAI web vibe: soft purples, glassmorphism, accent teal.
+src/theme/spacing.ts, src/theme/typography.ts
+Spacing scale, font sizes, weights.
+src/theme/ThemeProvider.tsx
+Context that exposes theme, isDark, toggleTheme.
+Use React Native’s useColorScheme as a hint.
+Common components (expose them in src/components/common/index.ts):
+PrimaryButton
+SecondaryButton
+Card
+ScreenContainer (handles SafeAreaView, padding, background gradient).
+SectionHeader
+TagChip
+AvatarCircle (for user or mannequin).
+LoadingOverlay / InlineLoader
+ErrorBanner
+EmptyState (for when wardrobe/outfits are empty).
+Write example implementations in TypeScript for:
+PrimaryButton.tsx
+ScreenContainer.tsx
+Card.tsx
+TagChip.tsx
+Include style objects using StyleSheet.create.
+
+4. State & Context (Auth, Wardrobe, Demo Mode)
+Define lightweight state management using React context + hooks:
+src/store/AuthContext.tsx
+State: user, token, isLoading, isGuest.
+Methods: signIn(email, password), signOut(), signInAsGuest().
+Store token in AsyncStorage; restore on app startup.
+src/store/DemoContext.tsx
+demoMode: boolean
+setDemoMode(boolean)
+In demo mode, services should:
+Never call live sponsor APIs.
+Use demo endpoints or local fixtures instead.
+src/store/WardrobeContext.tsx
+items: WardrobeItem[]
+addItem, updateItem, removeItem, refreshWardrobe().
+WardrobeItem type: id, name, category, color, imageUrl, tags, usageCount, lastWorn, etc.
+src/store/OutfitContext.tsx
+outfits: Outfit[]
+generateOutfits()
+rateOutfit(outfitId, rating)
+saveOutfit(outfitId)
+Provide high‑level code for each context provider, plus hooks:
+useAuth()
+useDemoMode()
+useWardrobe()
+useOutfits()
+Each method should either call apiClient or, when demoMode is true, use demoData.
+
+5. API Client & Demo Data
+Create:
+src/services/apiClient.ts
+Uses fetch or axios (your choice) with:
+Base URL (e.g., https://api.closetai.dev).
+Authorization header when token is available.
+Expose high‑level methods:
+getWardrobe()
+createWardrobeItem(payload)
+getRecommendations(params)
+createTryOnJob(payload)
+getTryOnResult(jobId)
+generateCaption(payload)
+Each method returns typed data; include TS interfaces.
+src/services/demoData.ts
+Arrays of mock wardrobe items and outfits.
+Mock try‑on results (image URLs or local asset references).
+Mock captions/hashtags.
+A simple isDemoEnabled helper that reads from DemoContext and chooses between live and mock implementation.
+Write high‑level TypeScript for these files, with TODO comments where actual endpoints would be wired.
+
+6. Screen Scaffolds (High‑Level React Native Code)
+For each of the main screens, write full TypeScript components that use the context/hooks and components above. Code should be high‑level but realistic.
+6.1 Onboarding
+src/screens/Onboarding/OnboardingCarouselScreen.tsx
+Uses a flatlist or react-native-snap-carousel style pagination.
+Each slide: illustration placeholder, title, subtitle, CTA.
+“Get Started” -> Welcome/Auth.
+“Continue as Guest” sets isGuest and demoMode=true.
+6.2 Auth
+src/screens/Auth/WelcomeScreen.tsx
+Buttons:
+“Sign in / Create account”
+“Continue as guest”
+src/screens/Auth/SignInScreen.tsx
+Email/password form.
+Submit -> auth.signIn.
+Basic validation and error states.
+6.3 Home
+src/screens/Home/HomeScreen.tsx
+Shows:
+“Today’s Outfit” card (top recommendation).
+Quick actions: “Add item”, “Try‑on”, “Generate content”.
+A small analytics snippet: “You’ve worn 40% of your wardrobe this month”.
+6.4 Wardrobe
+src/screens/Wardrobe/WardrobeScreen.tsx
+Grid of items with filters (category, color).
+Uses WardrobeContext.
+src/screens/Wardrobe/AddItemScreen.tsx
+Camera/gallery picker.
+Simple form for tags.
+onSave calls addItem.
+6.5 Outfits
+src/screens/Outfits/OutfitSuggestionsScreen.tsx
+List of outfits from useOutfits.
+Each card shows outfit items, description, actions.
+CTA to “Explain this outfit”.
+src/components/outfits/OutfitCard.tsx
+Reusable card component.
+6.6 Try‑On
+src/screens/TryOn/TryOnScreen.tsx
+Step 1: choose selfie (from camera/gallery).
+Step 2: choose garment(s) from wardrobe.
+Step 3: “Try On” button -> create job via createTryOnJob.
+Status: show a progress indicator.
+When done: show before/after view.
+src/components/tryon/BeforeAfterSlider.tsx
+Simple implementation using two Image components and pan gesture or slider.
+6.7 Content
+src/screens/Content/ContentStudioScreen.tsx
+Select outfit.
+Call generateCaption.
+Show caption + hashtags and optional styled image.
+Buttons to copy caption and save image.
+6.8 Settings
+src/screens/Settings/SettingsScreen.tsx
+Toggle theme.
+Toggle demo mode.
+Edit preferences (style, sizing).
+Sign out.
+Provide TSX for each of these main screens in a simplified but clear layout, using placeholders (Image with sample URIs, Text with mock copy).
+
+7. Camera & Media (High‑Level)
+Describe and scaffold integration for:
+Using Expo Image Picker / Camera:
+useImagePicker hook in src/hooks/useImagePicker.ts:
+pickFromLibrary()
+captureWithCamera()
+returns { uri, base64? } or similar.
+A MediaPreview component to show selected image and retake/replace actions.
+Code can include TODOs where actual permissions and platform‑specific configs are needed.
+
+8. Demo Mode UX
+Design a consistent Demo Mode experience:
+Visual Indicator:
+A small badge in the header or a banner at top: “Demo Mode – no real credits used.”
+Behavior:
+All AI/remote calls use demoData when demoMode is true.
+Try‑on uses static assets to simulate results.
+Outfit recommendations use mock arrays.
+Settings:
+Toggle in Settings screen to switch between Demo and Live (live will require auth + configured backend).
+Write code snippets showing:
+How useDemoMode gets used inside OutfitSuggestionsScreen and TryOnScreen.
+Example: const { demoMode } = useDemoMode(); -> choose between apiClient and demoService.
+
+9. Error Handling, Loading, and Empty States
+Specify patterns for:
+useRequest hook:
+Wraps async calls.
+Exposes { data, error, loading, refetch }.
+In screens, show:
+LoadingOverlay while waiting for API.
+ErrorBanner with “Retry” button on failure.
+EmptyState component when arrays are empty.
+Write the high‑level code for useRequest and how it’s used in, for example, WardrobeScreen.
+
+10. Accessibility & Polish
+Clarify:
+Use accessibilityLabel and accessible props for key components.
+Ensure tap targets are large enough.
+Support dynamic font sizes reasonably (e.g., avoid fixed heights).
+Use SafeAreaView and scroll views properly.
+Add notes in component code where accessibility is important.
+
+11. Putting It All Together
+At the end of your answer:
+Show a pseudo main index of files with 1‑line summaries per file.
+Provide a short README section for the mobile app:
+How to run in demo mode (no backend).
+How to configure base URL and enable live mode.
+High‑level explanation of each main tab.
+Optionally, include a sample test for one simple component (e.g., PrimaryButton) using Jest/React Native Testing Library, but keep tests minimal.
+
+Style Requirements for Your Output
+Use TypeScript in all React Native code snippets.
+Favor clarity over complete implementability; it’s OK if some imports are symbolic.
+Include plenty of comments that explain intent, trade‑offs, and where to plug backend endpoints.
+Make the response long (15+ pages worth of text), structured, and easy to skim.
+Do not ask me questions; make reasonable assumptions and document them inline as comments.
+End of prompt.
+

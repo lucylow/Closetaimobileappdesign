@@ -1,0 +1,698 @@
+CLOSET A.I. + SKINCARE
+High-Level Implementation Guide for Adding YouCam Skin AI to the Existing Mobile Application
+Hackathon-oriented product, UX, architecture, API, privacy, and demo plan
+Prepared from the supplied Closet-Organizer-AI ZIP and the skincare product ideas supplied in the conversation. This guide is intentionally high-level: it explains what to add, where it belongs, how the pieces connect, and how to turn Skin AI into a differentiated extension of the closet experience rather than a standalone scanner.
+Important baseline observation: the supplied project already has an Expo Router mobile app, an Express/TypeScript server, a YouCam integration module at server/youcam.ts, authentication/credits infrastructure, wardrobe and outfit data models, and a virtual try-on flow. The guide therefore treats skincare as a new product capability layered into that existing architecture.
+Target outcome: a single personal-style journey in which a user can scan skin, understand high-level concerns, receive a simple skincare routine, and then use those insights to influence outfit colors, styling, accessories, and preparation for an occasion.
+Version: August 2026
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+1. Executive Summary
+The product change in one page
+The core idea
+Do not add a generic “AI Skin Checker” as a disconnected fifth feature. Add a Skin Care journey that strengthens the central value proposition of Closet A.I.: helping a person decide what to wear and how to present themselves with more confidence.
+Recommended end-to-end journey
+Open Closet A.I. and choose Skin Care from Home or the main navigation.
+Take or select a well-lit selfie with a simple privacy explanation.
+Send the image to the server, where the server authenticates with YouCam and performs the Skin Analysis workflow.
+Show a clear skin snapshot using understandable scores and concern cards.
+Translate the highest-priority results into a conservative, non-diagnostic daily-care routine.
+Ask for the occasion or use the user's existing outfit context.
+Combine skin insights with wardrobe metadata to recommend flattering color families, neckline/accessory choices, and a simple “ready for the day” checklist.
+Optionally connect the result to Apparel Virtual Try-On so the user can preview the recommended outfit.
+Let the user save a Skin Snapshot and optionally compare future snapshots at a high level.
+Why this is stronger for the hackathon
+It uses the required YouCam capability as a meaningful product primitive rather than a one-screen wrapper.
+It connects Skin AI to the existing wardrobe, outfits, and try-on systems.
+It creates a complete consumer journey from scan → interpretation → action → styling → preview.
+It gives the demo a memorable narrative: “Understand your skin, then use that insight to style the whole look.”
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+2. Product Inspiration and Differentiation
+Use the supplied reference ideas without copying them
+What the supplied examples teach us
+The reference material describes several established patterns: selfie-based analysis, fast results, multiple concern categories, personalized routines, product-aware recommendations, conversational skincare guidance, and privacy messaging. Those patterns are useful UX benchmarks.
+Reference pattern
+Useful lesson for Closet A.I.
+How to differentiate
+Smart selfie scan
+Make the first step fast and obvious.
+Use the scan as the entry point to a broader style journey.
+Seven or more concern categories
+Users understand cards and scores better than raw model output.
+Prioritize a small set of actionable concerns and avoid overwhelming the user.
+Four-step routine
+People want a next step, not just a score.
+Tie the routine to the day's outfit/occasion and keep it practical.
+Conversational skin advisor
+Follow-up questions increase engagement.
+Use the existing app assistant patterns if available, but ground replies in the latest scan.
+Product recommendations
+Commerce can follow insight.
+Start with product-category recommendations; add affiliate/catalog integration later.
+Long-term skin portrait
+Tracking can create repeat usage.
+Store consented summaries, not unnecessary raw selfies.
+
+The differentiation statement
+Closet A.I. should not claim to be a dermatologist or simply another skin checker. Its distinctive promise is: “Your skin snapshot becomes one input into a complete personal-style plan.”
+Avoid
+Copying another company's exact UI, language, or claims.
+Making medical diagnoses from scores.
+Presenting AI output as a substitute for professional care.
+Adding product links before the recommendation logic is trustworthy.
+Storing selfies indefinitely just because the feature can.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+3. Current ZIP Architecture
+Where the skincare feature should fit
+Observed application structure
+Existing area
+Role
+Skincare extension
+app/(tabs)
+Primary mobile navigation and screens
+Add a Skin Care route/tab or an entry point that opens a dedicated skin screen.
+app/(tabs)/index.tsx
+Home dashboard
+Add a Skin AI quick action and a lightweight latest-snapshot card.
+app/(tabs)/wardrobe.tsx
+Wardrobe management
+Use wardrobe colors/categories as inputs to style recommendations.
+app/(tabs)/outfits.tsx
+Outfit generation
+Allow skin-aware styling preferences to influence suggestions.
+app/(tabs)/tryon.tsx
+Virtual try-on
+Use the selected skin-aware outfit as a preview target.
+contexts/AppContext.tsx
+Shared mobile state and API actions
+Add skin snapshot state, scan action, and refresh helpers.
+server/routes.ts
+Authenticated API routes
+Add /api/skin/* endpoints and credit/privacy controls.
+server/youcam.ts
+YouCam server integration
+Extend the existing auth/upload/task polling utilities for Skin Analysis.
+shared/schema.ts
+Postgres/Drizzle schema
+Add consented skin snapshot and concern-summary records.
+server/storage.ts
+Persistence abstraction
+Add create/get/update operations for skin data.
+components/CreditGate.tsx
+Credit gating
+Reuse for scan usage and clear cost messaging.
+
+Important implementation reality
+The supplied ZIP contains a YouCam integration module, but the inspected source does not show a completed Skin Care screen or a dedicated Skin Analysis route. The right approach is therefore to extend the existing integration rather than assume that a production-ready skin feature is already present.
+Architectural principle
+Keep YouCam credentials on the server. The mobile application should never receive the secret key or implement the server-to-server authentication itself.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+4. Proposed User Experience
+A six-stage mobile journey
+Stage A — Entry
+Home card: “Skin AI — Check your skin in seconds.”
+Navigation option: “Skin” or “Skin Care.”
+Show the latest scan date and a compact top concern if a prior scan exists.
+Stage B — Scan preparation
+Explain that the user should use a well-lit, front-facing image.
+Ask the user to remove heavy face-covering items if necessary for analysis quality.
+Show a concise privacy message: the image is used for analysis; retention should be controlled by the app's policy.
+Provide Camera and Photo Library choices.
+Stage C — Analysis
+Show progress states: Uploading → Analyzing → Preparing your snapshot.
+Do not expose raw API status codes or technical terminology.
+Allow cancellation before analysis begins where practical.
+Stage D — Results
+Lead with a “Skin Snapshot” summary.
+Use a small number of top concerns, followed by secondary metrics.
+Explain each score in plain language.
+Include a visible “Not medical advice” boundary.
+Stage E — Action
+Generate a simple AM/PM-style routine from concern categories.
+Use product categories first: cleanser, moisturizer, sunscreen, targeted care.
+Add ingredient education only when grounded and clearly labeled as general information.
+Stage F — Style connection
+Ask: “What are you dressing for?” or reuse an existing occasion.
+Recommend clothing color families and styling choices using wardrobe data.
+Offer “Build my look” and, if available, “Try it on.”
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+5. Skin Analysis Data Model
+Design the data contract before building the UI
+Recommended normalized result shape
+SkinSnapshot
+- id
+- userId
+- createdAt
+- source: "youcam"
+- imageRetention: "not_saved" | "temporary" | "saved_by_user"
+- skinType: string | null
+- overallSummary: string
+- concerns: SkinConcern[]
+- routine: RoutineStep[]
+- styleInsights: StyleInsight[]
+- modelVersion: string | null
+- consentVersion: string
+SkinConcern
+SkinConcern
+- key: "moisture" | "oiliness" | "texture" | "pores"
+      | "redness" | "acne" | "radiance" | "spots"
+      | "wrinkles" | other
+- score: number | null
+- label: string
+- severityBand: "low" | "moderate" | "high" | "unknown"
+- explanation: string
+- action: string
+RoutineStep
+RoutineStep
+- time: "AM" | "PM"
+- order: number
+- category: string
+- goal: string
+- notes: string
+- optional: boolean
+Why use a normalized model
+YouCam responses can change or expose more fields than the UI needs.
+The mobile app should depend on a stable internal contract, not vendor-specific JSON.
+A normalized model makes it easier to add another analysis source later.
+It makes the recommendation engine testable without calling YouCam.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+6. YouCam Integration Architecture
+Server-side workflow
+The recommended request flow
+Mobile app sends a selfie to the Closet A.I. backend using the authenticated API.
+Backend validates the request, checks credits, and creates the appropriate YouCam upload slot.
+Backend uploads the image to the returned YouCam upload URL.
+Backend creates the Skin Analysis task using the uploaded file identifier.
+Backend polls the task endpoint until it succeeds or fails.
+Backend maps the vendor result into the internal SkinSnapshot contract.
+Backend stores only the fields needed for the user experience and configured retention policy.
+Backend returns the normalized result to the mobile app.
+Why the server should own this flow
+Protects the YouCam client credentials.
+Centralizes authentication and token caching.
+Centralizes credits, retries, timeouts, and error handling.
+Allows future changes to YouCam without forcing a mobile release.
+Makes logging and privacy controls easier to enforce.
+Existing integration to extend
+The ZIP already has server/youcam.ts with server-side authentication, token caching, file-upload helpers, task creation, and task polling patterns. Extend that module with Skin Analysis-specific functions instead of creating a second YouCam client.
+High-level functions to add
+createSkinAnalysisFileUpload()
+startSkinAnalysisTask(fileId)
+getSkinAnalysisTask(taskId)
+pollSkinAnalysisTask(taskId)
+normalizeSkinAnalysisResult(rawResult)
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+7. API Endpoints in the Closet A.I. Backend
+Keep mobile calls simple
+Recommended routes
+Endpoint
+Purpose
+Notes
+POST /api/skin/scan
+Start a skin scan from an image
+Authenticate, validate, charge credits, run YouCam workflow.
+GET /api/skin/snapshots
+List prior summaries
+Return summaries only; do not return raw images by default.
+GET /api/skin/snapshots/:id
+Open a saved snapshot
+Return normalized concerns and routine.
+DELETE /api/skin/snapshots/:id
+Delete saved skin data
+Honor privacy controls.
+POST /api/skin/recommendations
+Generate style/skincare recommendations
+Use latest snapshot plus wardrobe/occasion.
+GET /api/skin/status
+Optional health/config endpoint
+Useful during development, not necessarily public.
+
+Request design
+POST /api/skin/scan
+{
+ "imageBase64": "...",
+ "saveSnapshot": false,
+ "consentVersion": "skin-v1"
+}
+Response design
+{
+ "snapshot": {
+   "id": "...",
+   "skinType": "...",
+   "concerns": [...],
+   "routine": [...],
+   "styleInsights": [...]
+ },
+ "creditsRemaining": 92
+}
+Error categories
+400 — invalid or missing image.
+401 — unauthenticated user.
+402 — insufficient credits.
+413 — image too large.
+422 — image unsuitable for analysis.
+429 — vendor or application rate limit.
+502 — YouCam service failure.
+504 — analysis timeout.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+8. Mobile Implementation
+Expo Router + React Native plan
+Recommended file additions
+app/(tabs)/skin.tsx
+components/skin/SkinScanCard.tsx
+components/skin/SkinResultCard.tsx
+components/skin/SkinConcernCard.tsx
+components/skin/RoutineCard.tsx
+components/skin/SkinStyleBridge.tsx
+lib/skin.ts
+Navigation
+If a permanent fifth/sixth tab is appropriate for the product, add Skin to the existing tab layout. If navigation space is limited, keep the current tabs and add Skin as a prominent Home destination. For the hackathon demo, a dedicated visible Skin entry is preferable because judges should understand the new capability immediately.
+Mobile responsibilities
+Select/capture the image.
+Show consent and scan instructions.
+Call the backend.
+Display loading and failure states.
+Render normalized results.
+Store only local UI state that is necessary.
+Navigate to wardrobe/outfit/try-on with selected recommendations.
+Do not
+Put PERFECT_YOUCAM_SECRET_KEY in Expo public configuration.
+Call the server-to-server YouCam authentication endpoint directly from the phone.
+Hard-code a real API key in source control.
+Treat a demo fallback as the primary production path.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+9. Skin Result UI
+Turn scores into decisions
+Recommended screen hierarchy
+Header: “Your Skin Snapshot.”
+Top-level summary: a short, reassuring interpretation.
+Top three actionable concerns.
+Expanded concern cards for additional metrics.
+Daily routine.
+Style bridge: colors, outfit guidance, and optional try-on.
+Privacy and medical boundary.
+Example result card
+Hydration — Moderate attention. Your scan suggests your skin may benefit from a consistent moisture-supporting routine. Focus on gentle cleansing, moisturizer, and daily sun protection. This is general skincare guidance, not a diagnosis.
+Scoring UX
+Use bands such as Low / Moderate / High rather than implying clinical diagnosis.
+Always show the metric name next to a score.
+Explain what action the score leads to.
+Avoid false precision such as “73.4% healthy.”
+Use accessible text labels in addition to color.
+Loading UX
+The scan is asynchronous, so the UI should communicate progress without pretending the analysis is instantaneous. The goal is confidence: the user should know that the app is working and that a result is coming.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+10. Personalized Skincare Routine
+Move from analysis to action
+Routine generator philosophy
+The routine engine should be deterministic and conservative at first. It should map concern categories to product categories and simple habits rather than attempting to prescribe medical treatment.
+Signal
+Safe high-level action
+Avoid
+Low moisture / dryness
+Gentle cleanser + moisturizer + sunscreen
+Diagnosing a skin condition.
+Oiliness
+Gentle cleansing + lightweight moisturizer + sunscreen
+Aggressive stripping or medication advice.
+Texture
+Gentle routine consistency + sunscreen
+Promising to remove texture or scars.
+Pores
+Gentle cleansing + non-comedogenic hydration guidance
+Claiming to permanently shrink pores.
+Redness
+Gentle routine and avoidance of obvious irritants
+Diagnosing rosacea or inflammation.
+Blemishes/acne
+Gentle care and general product-category education
+Prescribing treatment or claiming a cure.
+Radiance
+Hydration + sun protection + consistent routine
+Guaranteeing a glow result.
+
+Routine format
+AM
+1. Cleanse — gentle
+2. Treat — optional, based on concern
+3. Moisturize
+4. Sunscreen
+PM
+1. Cleanse
+2. Targeted care — optional
+3. Moisturize
+The exact steps should be generated from the categories actually returned by the configured YouCam analysis and from user preferences such as sensitivities or product exclusions, if those preferences are collected.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+11. The Big Differentiator: Skin-to-Style Intelligence
+Connect skincare to the existing closet
+The product bridge
+This is the most important innovation opportunity. The scan should not end with skincare. It should become another input to the styling engine.
+Inputs
+Skin concern summary.
+User's wardrobe item colors.
+Wardrobe categories and tags.
+Existing style profile.
+Occasion.
+Weather, if already available.
+User preferences and exclusions.
+Outputs
+Color families that complement the user's selected styling direction.
+Outfit combinations from existing wardrobe items.
+Accessory suggestions.
+Neckline or layering suggestions where appropriate.
+Optional skincare-prep checklist before the occasion.
+Optional Apparel Virtual Try-On preview.
+Example product moment
+“You are going to a dinner tonight. Your closet has a navy blazer, cream top, and silver accessories. Based on your current style preferences and today's skin snapshot, here are three looks that keep the styling balanced. Want to preview Look 1?”
+Important boundary
+Do not imply that skin scores determine what colors a person is allowed to wear. The engine should frame these as style suggestions, not rules. Personal taste remains primary.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+12. Skin + Wardrobe Recommendation Engine
+How to implement the bridge at a high level
+Phase 1 — Rule-based bridge
+Start with transparent rules so the hackathon demo is reliable. A rules engine is easier to debug than a fully generative system.
+recommendation = {
+ occasion,
+ topSkinSignals,
+ preferredColorFamilies,
+ wardrobeItems,
+ suggestedOutfits,
+ accessoryDirection,
+ prepChecklist
+}
+Phase 2 — AI explanation
+Once the deterministic candidate set exists, an AI model can explain why the selected pieces form a coherent look. The model should choose from the candidate wardrobe items rather than inventing clothing that does not exist.
+Phase 3 — Try-on
+Pass the selected garment IDs and selfie into the existing try-on flow. The user then sees the complete experience: scan → recommendation → virtual preview.
+Recommendation scoring
+Factor
+Example weight
+Purpose
+Occasion fit
+30%
+Keeps the look appropriate.
+Wardrobe compatibility
+25%
+Uses items the user actually owns.
+Style profile
+20%
+Respects established preferences.
+Color/style bridge
+15%
+Connects the skin-aware suggestion.
+Novelty/rotation
+10%
+Avoids repeating the same items.
+
+The percentages are a starting design choice, not a requirement. Tune them using demo behavior and user feedback.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+13. Database and Privacy Design
+Store the minimum necessary
+Recommended tables
+Table
+Purpose
+Retention
+skin_snapshots
+User-visible normalized analysis summaries
+Keep only if user saves or if product policy requires history.
+skin_concerns
+Optional normalized concern rows
+Same as snapshot.
+skin_preferences
+Optional routine preferences/exclusions
+Until user deletes or changes them.
+skin_events
+Operational analytics
+Short retention; avoid raw images.
+
+Suggested skin_snapshots fields
+id
+userId
+createdAt
+skinType
+summary
+topConcernsJson
+routineJson
+styleInsightsJson
+modelVersion
+consentVersion
+imageRetentionPolicy
+Privacy principles
+Do not store raw selfies unless there is a clear user-facing reason.
+If a temporary image is required for processing, delete it as soon as practical.
+Never put image data into analytics events.
+Give users a clear delete path for saved skin history.
+Keep vendor credentials and internal logs server-side.
+Document what is sent to YouCam and why.
+Why this matters
+The supplied reference material places strong emphasis on privacy and not retaining the user's photo. That is a useful product expectation to mirror: make privacy visible in the scan flow instead of hiding it in a settings page.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+14. Credits, Rate Limits, and Reliability
+Make the scan production-friendly
+Use the existing credit system
+The current application already has credit accounting and a CreditGate component. Reuse those patterns rather than inventing a second billing mechanism.
+Recommended cost
+The previous implementation proposal used 8 credits per live skin analysis. Treat that number as a product configuration, not a hard-coded assumption. Put the cost in one server-side constant so it can be tuned without changing the mobile UI.
+const SKIN_ANALYSIS_CREDITS = 8;
+Reliability rules
+Check credits before expensive vendor work.
+Do not consume credits for an invalid image.
+Decide whether a vendor failure refunds credits; document the rule.
+Set a maximum polling duration.
+Use exponential backoff if supported by the vendor workflow.
+Return user-friendly error messages.
+Log vendor request IDs rather than raw images.
+Demo fallback
+A demo mode is useful for the hackathon, but it should be visually labeled as demo data. The strongest submission is one where the recorded demo shows the real YouCam call and the fallback exists only for offline development or resilience.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+15. Testing and Validation Plan
+Test the feature as a product, not only as an API
+Backend tests
+YouCam authentication succeeds with valid credentials.
+Authentication failure is surfaced safely.
+Upload creation returns a usable file ID and upload URL.
+Image upload handles expected MIME types.
+Skin task creation accepts the uploaded file.
+Polling handles running, success, and error states.
+Timeouts do not leave requests hanging.
+Normalized output remains stable when optional vendor fields are absent.
+Mobile tests
+Camera/photo-library permission handling.
+No-image state.
+Poor-quality image guidance.
+Loading state.
+Success state.
+Vendor error state.
+Insufficient credits state.
+Dark/light mode.
+Small-screen layout.
+Accessibility labels.
+Integration tests
+Skin snapshot can feed outfit recommendations.
+Recommended outfit contains real wardrobe item IDs.
+Try-on receives the correct selected garment IDs.
+Saved skin history can be deleted.
+Guest/demo mode does not expose secrets.
+Manual hackathon test
+Fresh install/open.
+Complete onboarding.
+Add or use demo wardrobe.
+Open Skin Care.
+Run a real YouCam scan.
+Review the snapshot.
+Generate a style-aware outfit.
+Open Try-On.
+Show final result.
+Restart the app and verify expected persistence.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+16. Hackathon Demo Storyboard
+A 1–3 minute narrative
+Suggested 120-second demo
+Time
+Scene
+Message
+0:00–0:15
+Home screen
+Closet A.I. already understands the user's wardrobe.
+0:15–0:30
+Open Skin Care
+One selfie adds a new dimension to the style experience.
+0:30–0:55
+Live YouCam scan
+Show the real API workflow and result.
+0:55–1:15
+Skin Snapshot
+Show top concerns and a simple routine.
+1:15–1:35
+Style Bridge
+Turn the snapshot + occasion + wardrobe into an outfit.
+1:35–1:50
+Virtual Try-On
+Preview the selected look.
+1:50–2:00
+Final screen
+End with the product promise: skin-aware personal styling.
+
+What judges should understand without explanation
+YouCam Skin AI is actually integrated.
+The result changes what the application does next.
+The feature uses the existing closet rather than behaving like a separate app.
+The user gets a clear consumer outcome.
+The experience is polished enough to feel like a product.
+Video discipline
+Keep the demo under three minutes. Avoid spending most of the video on code, API documentation, or terminal output. The source repository can prove implementation; the video should prove the product.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+17. Hackathon Submission Alignment
+Map the build to the judging criteria
+Criterion
+Evidence to build
+What to emphasize
+Technological Implementation
+Real YouCam Skin Analysis + normalized backend + mobile UI + wardrobe integration.
+The API is part of a multi-step product workflow.
+Design
+Polished scan, results, routine, style bridge, and try-on flow.
+One coherent journey rather than disconnected screens.
+Potential Impact
+Faster personalized decision-making for beauty/fashion shoppers.
+Reduces uncertainty and increases confidence before an outfit decision.
+Quality of Idea
+Skin-to-style bridge.
+The novel insight is that skin analysis becomes a styling input.
+
+Submission assets checklist
+Public repository or correctly shared private repository.
+README with setup, environment variables, and API configuration.
+Screenshots of Home, Skin Scan, Skin Results, Style Bridge, and Try-On.
+1–3 minute public demo video.
+Clear statement of which YouCam API is used.
+Architecture diagram.
+Privacy/retention explanation.
+Known limitations and future work.
+Recommended project one-liner
+“Closet A.I. turns a YouCam skin snapshot into a personalized style decision—combining skincare guidance, the clothes you already own, and virtual try-on in one mobile journey.”
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+18. Step-by-Step Implementation Roadmap
+Recommended order of work
+Sprint 1 — Foundation
+Create the Skin Care route and navigation entry.
+Create the scan preparation UI.
+Add camera/photo-library selection.
+Add the server POST /api/skin/scan route.
+Extend server/youcam.ts with Skin Analysis-specific helpers.
+Add normalized response mapping.
+Sprint 2 — Results
+Create SkinSnapshot and SkinConcern types.
+Build result cards.
+Build routine generation rules.
+Add loading/error/credit states.
+Add privacy copy and retention behavior.
+Sprint 3 — Product differentiation
+Create Skin-to-Style bridge.
+Read wardrobe colors/categories from existing data.
+Generate candidate outfits.
+Add explanation layer.
+Connect the winning outfit to existing Try-On.
+Sprint 4 — Polish and submission
+Add Home quick action.
+Add latest snapshot card.
+Polish animations and accessibility.
+Run end-to-end testing.
+Capture screenshots.
+Record the 1–3 minute demo.
+Write README and Devpost description.
+Definition of done
+A user can start from the existing Closet A.I. mobile app, complete a real YouCam Skin Analysis, receive understandable results, obtain a conservative routine, use the result to influence an outfit from their own wardrobe, and preview that outfit. That is the minimum complete story to target.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+19. Suggested File/Code Change Map
+A practical implementation checklist
+File / area
+Change
+app/(tabs)/_layout.tsx
+Add Skin navigation if choosing a dedicated tab; otherwise keep Home entry.
+app/(tabs)/index.tsx
+Add Skin AI quick action and latest snapshot summary.
+app/(tabs)/skin.tsx
+New screen for scan, loading, results, and next actions.
+components/skin/*
+Extract cards and reusable result/routine components.
+contexts/AppContext.tsx
+Add skin snapshot state and API actions if the feature belongs in global app state.
+lib/skin.ts
+Client API helpers and normalized TypeScript types.
+server/youcam.ts
+Add Skin Analysis file/task functions using existing authentication.
+server/routes.ts
+Add authenticated skin scan/history/recommendation endpoints.
+server/storage.ts
+Add persistence methods for skin snapshots/preferences.
+shared/schema.ts
+Add skin-related tables/types and indexes.
+components/CreditGate.tsx
+Reuse for scan cost and insufficient-credit messaging.
+README/replit.md
+Document YouCam setup, environment variables, privacy, and demo steps.
+
+Environment variables
+PERFECT_YOUCAM_API_KEY=...
+PERFECT_YOUCAM_SECRET_KEY=...
+Never commit real credentials. Configure them through the server's secret/environment system.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+20. Final Product Concept
+What the finished experience should feel like
+The product loop
+SEE → UNDERSTAND → PREPARE → STYLE → TRY ON → SAVE
+      ↑                                  |
+      └──────────── LEARN / RETURN ──────┘
+Example user story
+A user opens Closet A.I. before going to dinner. They scan their skin with YouCam. The app summarizes the top concerns and offers a short routine. The user chooses “Dinner.” Closet A.I. looks at the existing wardrobe and suggests three looks. The user selects one and previews it with Virtual Try-On. The user can save the look and optionally save the skin snapshot.
+Why the concept is coherent
+Skincare is not an unrelated tab; it feeds the same personal-style decision.
+Wardrobe data makes recommendations tangible.
+Try-On turns recommendations into a visual result.
+The app can become more useful with repeat use without requiring permanent raw-image storage.
+The architecture is modular enough to add future beauty/fashion APIs.
+North-star experience
+The user should finish the flow feeling: “This app understood what I need today and helped me decide what to do and what to wear.”
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+Appendix A — Implementation Notes and Guardrails
+Important details for the build
+1. Vendor terminology
+Keep vendor-specific terminology in the server adapter. The mobile UI should use product language such as “Skin Snapshot,” “Hydration,” “Texture,” and “Routine,” while the adapter knows the exact YouCam endpoint and response fields.
+2. Claims
+Do not repeat third-party accuracy, medical-study, HIPAA, GDPR, or dermatologist-verification claims as if they belong to Closet A.I. unless those claims are explicitly documented for the exact service and implementation being used. The supplied reference material contains such claims about external products; they should be treated as inspiration, not as claims for this application.
+3. Image handling
+Use a temporary processing model by default. If the user chooses to save a snapshot, store the normalized analysis summary rather than the original selfie unless there is a separate, explicit product requirement.
+4. AI-generated guidance
+Keep skincare recommendations general and non-diagnostic. When a user reports severe, persistent, painful, or concerning symptoms, the product should encourage appropriate professional care rather than escalating into medical advice.
+5. Accessibility
+Do not encode severity by color alone.
+Use descriptive labels for icons.
+Keep tap targets large enough for mobile.
+Provide meaningful loading text.
+Support dynamic text sizes where practical.
+CLOSET A.I. + SKINCARE  •  Implementation Guide  • 
+Appendix B — Build Verification Checklist
+Before recording the final demo
+□ Fresh server starts successfully.
+□ Mobile app starts successfully.
+□ YouCam environment variables are configured in the server environment.
+□ YouCam authentication succeeds.
+□ Skin upload creation succeeds.
+□ Image upload succeeds.
+□ Skin Analysis task starts.
+□ Polling completes successfully.
+□ Normalized skin result renders.
+□ Routine renders.
+□ Wardrobe-aware recommendations render.
+□ Try-On receives the chosen outfit.
+□ Credits are charged according to configuration.
+□ Failed scans do not create misleading saved records.
+□ Privacy copy is visible.
+□ Demo mode is clearly distinguishable from live analysis.
+□ No secret appears in client code, logs, screenshots, or video.
+□ README contains setup instructions.
+□ Screenshots are captured on the target device.
+□ Demo video is under three minutes.
+Final recommendation
+Build the smallest complete loop first: real YouCam scan → normalized result → routine → wardrobe-aware style suggestion. Then add visual polish and Try-On. This sequence gives the hackathon entry a defensible technical core and a differentiated product story even if time becomes limited.
+
