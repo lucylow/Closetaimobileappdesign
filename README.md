@@ -5,7 +5,6 @@
 The newest Skin Care experience is designed to connect **how you dress, how you style yourself, and how you care for your skin** inside one mobile journey.
 
 > **Hackathon focus:** YouCam API Skin AI + Apparel Virtual Try-On
-> **Current development mode:** Skin Care includes a demo-first mock-data experience so the mobile UI can be demonstrated reliably in Expo while the live YouCam API integration is being finalized.
 
 ---
 
