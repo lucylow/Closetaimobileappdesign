@@ -1,4 +1,4 @@
-# ClosetAI 🚀 \- The Ultimate AI Wardrobe & AR Try-On Mobile App
+# ClosetAI 🚀 \- The Ultimate AI Wardrobe & AR Try-On Mobile React Native Cross Platform App
 
 **Transform your closet into a personal stylist with AI-powered outfit recommendations, AR try-on across 10 fashion categories, and creative shopping journeys.**
 
